@@ -40,8 +40,29 @@ data class AudioPlayerState(
     val currentChapter: Int? = null,
     val currentReciterId: Int? = null,
     val isBuffering: Boolean = false,
+    val isRepeatEnabled: Boolean = false,
     val errorMessage: String? = null
-)
+) {
+    /**
+     * Progress as a percentage (0-100)
+     */
+    val progressPercentage: Float
+        get() = if (durationMs > 0) {
+            (currentPositionMs.toFloat() / durationMs.toFloat()) * 100f
+        } else 0f
+
+    /**
+     * Remaining time in milliseconds
+     */
+    val remainingTimeMs: Long
+        get() = (durationMs - currentPositionMs).coerceAtLeast(0)
+
+    /**
+     * Check if player is actively playing
+     */
+    val isPlaying: Boolean
+        get() = playbackState == PlaybackState.PLAYING
+}
 
 /**
  * Service for managing audio playback using Media3 ExoPlayer
@@ -60,6 +81,7 @@ internal class AudioPlayerService @Inject constructor(
 
     private var currentChapter: Int? = null
     private var currentReciterId: Int? = null
+    private var isRepeatEnabled: Boolean = false
 
     init {
         setupPlayerListeners()
@@ -205,6 +227,25 @@ internal class AudioPlayerService @Inject constructor(
     }
 
     /**
+     * Set repeat mode
+     * @param enabled Whether to repeat the current chapter when it ends
+     */
+    fun setRepeatMode(enabled: Boolean) {
+        isRepeatEnabled = enabled
+        updateState(
+            playbackState = _playerState.value.playbackState,
+            isBuffering = _playerState.value.isBuffering,
+            isRepeatEnabled = enabled,
+            errorMessage = _playerState.value.errorMessage
+        )
+    }
+
+    /**
+     * Get current repeat mode
+     */
+    fun isRepeatEnabled(): Boolean = isRepeatEnabled
+
+    /**
      * Release player resources
      */
     fun release() {
@@ -215,6 +256,7 @@ internal class AudioPlayerService @Inject constructor(
     private fun updateState(
         playbackState: PlaybackState,
         isBuffering: Boolean = false,
+        isRepeatEnabled: Boolean = this.isRepeatEnabled,
         errorMessage: String? = null
     ) {
         _playerState.value = AudioPlayerState(
@@ -224,6 +266,7 @@ internal class AudioPlayerService @Inject constructor(
             currentChapter = currentChapter,
             currentReciterId = currentReciterId,
             isBuffering = isBuffering,
+            isRepeatEnabled = isRepeatEnabled,
             errorMessage = errorMessage
         )
     }
@@ -252,7 +295,14 @@ internal class AudioPlayerService @Inject constructor(
 
     private fun onPlaybackEnded() {
         MushafLibrary.logger.info("Playback ended for chapter $currentChapter")
-        // Can be extended to auto-play next chapter
-        stopPositionUpdates()
+
+        if (isRepeatEnabled) {
+            // Repeat current chapter
+            MushafLibrary.logger.info("Repeat enabled, restarting chapter $currentChapter")
+            seekTo(0)
+            play()
+        } else {
+            stopPositionUpdates()
+        }
     }
 }

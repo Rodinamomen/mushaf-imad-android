@@ -2,7 +2,9 @@ package com.mushafimad.library.di
 
 import android.content.Context
 import com.mushafimad.library.data.repository.PreferencesRepositoryImpl
+import com.mushafimad.library.data.repository.ReciterPreferencesRepositoryImpl
 import com.mushafimad.library.domain.repository.PreferencesRepository
+import com.mushafimad.library.domain.repository.ReciterPreferencesRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,5 +26,13 @@ object MushafPreferencesModule {
         @ApplicationContext context: Context
     ): PreferencesRepository {
         return PreferencesRepositoryImpl(context)
+    }
+
+    @Provides
+    @Singleton
+    internal fun provideReciterPreferencesRepository(
+        @ApplicationContext context: Context
+    ): ReciterPreferencesRepository {
+        return ReciterPreferencesRepositoryImpl(context)
     }
 }

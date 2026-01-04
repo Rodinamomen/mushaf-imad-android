@@ -82,6 +82,17 @@ interface AudioRepository {
     fun setPlaybackSpeed(speed: Float)
 
     /**
+     * Set repeat mode
+     * @param enabled Whether to repeat the current chapter when it ends
+     */
+    fun setRepeatMode(enabled: Boolean)
+
+    /**
+     * Get current repeat mode
+     */
+    fun isRepeatEnabled(): Boolean
+
+    /**
      * Get current playback position in milliseconds
      */
     fun getCurrentPosition(): Long

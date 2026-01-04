@@ -71,6 +71,14 @@ internal class AudioRepositoryImpl @Inject constructor(
         audioPlayerService.setPlaybackSpeed(speed)
     }
 
+    override fun setRepeatMode(enabled: Boolean) {
+        audioPlayerService.setRepeatMode(enabled)
+    }
+
+    override fun isRepeatEnabled(): Boolean {
+        return audioPlayerService.isRepeatEnabled()
+    }
+
     override fun getCurrentPosition(): Long {
         return audioPlayerService.getCurrentPosition()
     }
