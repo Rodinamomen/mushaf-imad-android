@@ -9,6 +9,7 @@ import com.mushafimad.library.domain.repository.ChapterRepository
 import com.mushafimad.library.domain.repository.PageRepository
 import com.mushafimad.library.domain.repository.QuranRepository
 import com.mushafimad.library.domain.repository.ReadingHistoryRepository
+import com.mushafimad.library.domain.repository.SearchHistoryRepository
 import com.mushafimad.library.domain.repository.VerseRepository
 import dagger.Module
 import dagger.Provides
@@ -102,5 +103,13 @@ object MushafCoreModule {
         realmService: RealmService
     ): ReadingHistoryRepository {
         return ReadingHistoryRepositoryImpl(realmService)
+    }
+
+    @Provides
+    @Singleton
+    internal fun provideSearchHistoryRepository(
+        realmService: RealmService
+    ): SearchHistoryRepository {
+        return SearchHistoryRepositoryImpl(realmService)
     }
 }

@@ -26,7 +26,7 @@ internal class RealmServiceImpl @Inject constructor(
 
     companion object {
         private const val REALM_FILE_NAME = "quran.realm"
-        private const val SCHEMA_VERSION = 25L  // Updated for user data features
+        private const val SCHEMA_VERSION = 26L  // Updated for search history (Week 8)
     }
 
     override val isInitialized: Boolean
@@ -74,7 +74,9 @@ internal class RealmServiceImpl @Inject constructor(
                 // User data entities (Week 7)
                 BookmarkEntity::class,
                 ReadingHistoryEntity::class,
-                LastReadPositionEntity::class
+                LastReadPositionEntity::class,
+                // Search history entities (Week 8)
+                SearchHistoryEntity::class
             )
         )
             .name(REALM_FILE_NAME)

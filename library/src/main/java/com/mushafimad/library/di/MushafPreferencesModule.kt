@@ -3,8 +3,10 @@ package com.mushafimad.library.di
 import android.content.Context
 import com.mushafimad.library.data.repository.PreferencesRepositoryImpl
 import com.mushafimad.library.data.repository.ReciterPreferencesRepositoryImpl
+import com.mushafimad.library.data.repository.ThemeRepositoryImpl
 import com.mushafimad.library.domain.repository.PreferencesRepository
 import com.mushafimad.library.domain.repository.ReciterPreferencesRepository
+import com.mushafimad.library.domain.repository.ThemeRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,5 +36,13 @@ object MushafPreferencesModule {
         @ApplicationContext context: Context
     ): ReciterPreferencesRepository {
         return ReciterPreferencesRepositoryImpl(context)
+    }
+
+    @Provides
+    @Singleton
+    internal fun provideThemeRepository(
+        @ApplicationContext context: Context
+    ): ThemeRepository {
+        return ThemeRepositoryImpl(context)
     }
 }
