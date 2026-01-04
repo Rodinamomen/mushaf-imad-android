@@ -1,0 +1,373 @@
+package com.mushafimad.library.data.repository
+
+import android.content.Context
+import com.mushafimad.library.data.local.entities.*
+import com.mushafimad.library.domain.models.*
+import io.realm.kotlin.Realm
+import io.realm.kotlin.RealmConfiguration
+import io.realm.kotlin.ext.query
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.File
+import javax.inject.Inject
+import javax.inject.Singleton
+
+/**
+ * Implementation of RealmService that provides access to the Quran database
+ * Internal API - not exposed to library consumers
+ */
+@Singleton
+internal class RealmServiceImpl @Inject constructor(
+    private val context: Context
+) : RealmService {
+
+    private var realm: Realm? = null
+    private var configuration: RealmConfiguration? = null
+
+    companion object {
+        private const val REALM_FILE_NAME = "quran.realm"
+        private const val SCHEMA_VERSION = 24L
+    }
+
+    override val isInitialized: Boolean
+        get() = realm != null
+
+    override suspend fun initialize() = withContext(Dispatchers.IO) {
+        // Skip if already initialized
+        if (realm != null) return@withContext
+
+        // Get the bundled Realm file from assets
+        val assetManager = context.assets
+        val realmInputStream = try {
+            assetManager.open(REALM_FILE_NAME)
+        } catch (e: Exception) {
+            throw IllegalStateException("Could not find $REALM_FILE_NAME in assets", e)
+        }
+
+        // Get app's internal storage directory
+        val appFilesDir = context.filesDir
+        val realmFile = File(appFilesDir, REALM_FILE_NAME)
+
+        // Copy the bundled Realm file to internal storage if it doesn't exist
+        if (!realmFile.exists()) {
+            realmInputStream.use { input ->
+                realmFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+        }
+
+        // Configure Realm
+        val config = RealmConfiguration.Builder(
+            schema = setOf(
+                ChapterEntity::class,
+                VerseEntity::class,
+                PageEntity::class,
+                PartEntity::class,
+                QuarterEntity::class,
+                VerseHighlightEntity::class,
+                VerseMarkerEntity::class,
+                PageHeaderEntity::class,
+                ChapterHeaderEntity::class,
+                QuranSectionEntity::class
+            )
+        )
+            .name(REALM_FILE_NAME)
+            .schemaVersion(SCHEMA_VERSION)
+            .directory(appFilesDir.absolutePath)
+            .build()
+
+        configuration = config
+        realm = Realm.open(config)
+    }
+
+    // MARK: - Chapter Operations
+
+    override suspend fun fetchAllChaptersAsync(): List<Chapter> = withContext(Dispatchers.IO) {
+        val realmInstance = realm ?: throw IllegalStateException("Realm not initialized")
+        realmInstance.query<ChapterEntity>()
+            .sort("number")
+            .find()
+            .map { it.toDomain() }
+    }
+
+    override suspend fun getChapter(number: Int): Chapter? = withContext(Dispatchers.IO) {
+        val realmInstance = realm ?: return@withContext null
+        realmInstance.query<ChapterEntity>("number == $0", number)
+            .first()
+            .find()
+            ?.toDomain()
+    }
+
+    override suspend fun getChapterForPage(pageNumber: Int): Chapter? = withContext(Dispatchers.IO) {
+        val page = getPageEntity(pageNumber) ?: return@withContext null
+
+        // Check if page has chapter headers (new chapters starting on this page)
+        val firstHeader = page.chapterHeaders1441.firstOrNull()
+        if (firstHeader != null) {
+            return@withContext firstHeader.chapter?.toDomain()
+        }
+
+        // Otherwise, get the chapter of the first verse on the page
+        val firstVerse = page.verses1441.firstOrNull()
+        return@withContext firstVerse?.chapter?.toDomain()
+    }
+
+    override suspend fun getChaptersOnPage(pageNumber: Int): List<Chapter> = withContext(Dispatchers.IO) {
+        val page = getPageEntity(pageNumber) ?: return@withContext emptyList()
+
+        val chapters = mutableSetOf<ChapterEntity>()
+
+        // Add chapters from headers
+        page.chapterHeaders1441.forEach { header ->
+            header.chapter?.let { chapters.add(it) }
+        }
+
+        // Add chapters from verses
+        page.verses1441.forEach { verse ->
+            verse.chapter?.let { chapters.add(it) }
+        }
+
+        chapters.sortedBy { it.number }.map { it.toDomain() }
+    }
+
+    // MARK: - Page Operations
+
+    override suspend fun getPage(number: Int): Page? = withContext(Dispatchers.IO) {
+        getPageEntity(number)?.toDomain()
+    }
+
+    override suspend fun fetchPageAsync(number: Int): Page? = getPage(number)
+
+    override suspend fun getTotalPages(): Int = withContext(Dispatchers.IO) {
+        val realmInstance = realm ?: return@withContext 604
+        realmInstance.query<PageEntity>().count().find().toInt()
+    }
+
+    private suspend fun getPageEntity(number: Int): PageEntity? = withContext(Dispatchers.IO) {
+        val realmInstance = realm ?: return@withContext null
+        realmInstance.query<PageEntity>("number == $0", number)
+            .first()
+            .find()
+    }
+
+    // MARK: - Page Header Operations
+
+    override suspend fun getPageHeaderInfo(pageNumber: Int, mushafType: MushafType): PageHeaderInfo? =
+        withContext(Dispatchers.IO) {
+            val page = getPageEntity(pageNumber) ?: return@withContext null
+
+            val header = when (mushafType) {
+                MushafType.HAFS_1441 -> page.header1441
+                MushafType.HAFS_1405 -> page.header1405
+            } ?: return@withContext null
+
+            PageHeaderInfo(
+                partNumber = header.part?.number,
+                partArabicTitle = header.part?.arabicTitle,
+                partEnglishTitle = header.part?.englishTitle,
+                hizbNumber = header.quarter?.hizbNumber,
+                hizbFraction = header.quarter?.hizbFraction,
+                quarterArabicTitle = header.quarter?.arabicTitle,
+                quarterEnglishTitle = header.quarter?.englishTitle,
+                chapters = header.chapters.map { chapter ->
+                    ChapterInfo(
+                        number = chapter.number,
+                        arabicTitle = chapter.arabicTitle,
+                        englishTitle = chapter.englishTitle
+                    )
+                }
+            )
+        }
+
+    // MARK: - Verse Operations
+
+    override suspend fun getVersesForPage(pageNumber: Int, mushafType: MushafType): List<Verse> =
+        withContext(Dispatchers.IO) {
+            val page = getPageEntity(pageNumber) ?: return@withContext emptyList()
+
+            val verses = when (mushafType) {
+                MushafType.HAFS_1441 -> page.verses1441
+                MushafType.HAFS_1405 -> page.verses1405
+            }
+
+            verses.map { it.toDomain() }
+        }
+
+    override suspend fun getVersesForChapter(chapterNumber: Int): List<Verse> = withContext(Dispatchers.IO) {
+        val realmInstance = realm ?: return@withContext emptyList()
+        val chapter = realmInstance.query<ChapterEntity>("number == $0", chapterNumber)
+            .first()
+            .find() ?: return@withContext emptyList()
+
+        chapter.verses.map { it.toDomain() }
+    }
+
+    override suspend fun getVerse(chapterNumber: Int, verseNumber: Int): Verse? = withContext(Dispatchers.IO) {
+        val realmInstance = realm ?: return@withContext null
+        val humanReadableID = "${chapterNumber}_${verseNumber}"
+
+        realmInstance.query<VerseEntity>("humanReadableID == $0", humanReadableID)
+            .first()
+            .find()
+            ?.toDomain()
+    }
+
+    override suspend fun getSajdaVerses(): List<Verse> = withContext(Dispatchers.IO) {
+        val realmInstance = realm ?: return@withContext emptyList()
+
+        // Known sajda verse IDs
+        val sajdaVerseKeys = listOf(
+            "7:206", "13:15", "16:50", "17:109", "19:58",
+            "22:18", "22:77", "25:60", "27:26", "32:15",
+            "38:24", "41:38", "53:62", "84:21", "96:19"
+        )
+
+        sajdaVerseKeys.mapNotNull { key ->
+            realmInstance.query<VerseEntity>("humanReadableID == $0", key)
+                .first()
+                .find()
+                ?.toDomain()
+        }
+    }
+
+    // MARK: - Part (Juz) Operations
+
+    override suspend fun getPart(number: Int): Part? = withContext(Dispatchers.IO) {
+        val realmInstance = realm ?: return@withContext null
+        realmInstance.query<PartEntity>("number == $0", number)
+            .first()
+            .find()
+            ?.toDomain()
+    }
+
+    override suspend fun getPartForPage(pageNumber: Int): Part? = withContext(Dispatchers.IO) {
+        val page = getPageEntity(pageNumber) ?: return@withContext null
+        page.header1441?.part?.toDomain()
+    }
+
+    override suspend fun getPartForVerse(chapterNumber: Int, verseNumber: Int): Part? =
+        withContext(Dispatchers.IO) {
+            val verse = getVerse(chapterNumber, verseNumber) ?: return@withContext null
+            val realmInstance = realm ?: return@withContext null
+
+            realmInstance.query<VerseEntity>("humanReadableID == $0", "${chapterNumber}_${verseNumber}")
+                .first()
+                .find()
+                ?.part
+                ?.toDomain()
+        }
+
+    override suspend fun fetchAllPartsAsync(): List<Part> = withContext(Dispatchers.IO) {
+        val realmInstance = realm ?: throw IllegalStateException("Realm not initialized")
+        realmInstance.query<PartEntity>()
+            .sort("number")
+            .find()
+            .map { it.toDomain() }
+    }
+
+    // MARK: - Quarter (Hizb) Operations
+
+    override suspend fun getQuarter(hizbNumber: Int, fraction: Int): Quarter? = withContext(Dispatchers.IO) {
+        val realmInstance = realm ?: return@withContext null
+        realmInstance.query<QuarterEntity>("hizbNumber == $0 AND hizbFraction == $1", hizbNumber, fraction)
+            .first()
+            .find()
+            ?.toDomain()
+    }
+
+    override suspend fun getQuarterForPage(pageNumber: Int): Quarter? = withContext(Dispatchers.IO) {
+        val page = getPageEntity(pageNumber) ?: return@withContext null
+        page.header1441?.quarter?.toDomain()
+    }
+
+    override suspend fun getQuarterForVerse(chapterNumber: Int, verseNumber: Int): Quarter? =
+        withContext(Dispatchers.IO) {
+            val realmInstance = realm ?: return@withContext null
+
+            realmInstance.query<VerseEntity>("humanReadableID == $0", "${chapterNumber}_${verseNumber}")
+                .first()
+                .find()
+                ?.quarter
+                ?.toDomain()
+        }
+
+    override suspend fun fetchAllQuartersAsync(): List<Quarter> = withContext(Dispatchers.IO) {
+        val realmInstance = realm ?: throw IllegalStateException("Realm not initialized")
+        realmInstance.query<QuarterEntity>()
+            .find()
+            .sortedWith(compareBy({ it.hizbNumber }, { it.hizbFraction }))
+            .map { it.toDomain() }
+    }
+
+    // MARK: - Search Operations
+
+    override suspend fun searchVerses(query: String): List<Verse> = withContext(Dispatchers.IO) {
+        val realmInstance = realm ?: return@withContext emptyList()
+        realmInstance.query<VerseEntity>("searchableText CONTAINS[c] $0", query)
+            .find()
+            .map { it.toDomain() }
+    }
+
+    override suspend fun searchChapters(query: String): List<Chapter> = withContext(Dispatchers.IO) {
+        val realmInstance = realm ?: return@withContext emptyList()
+        realmInstance.query<ChapterEntity>(
+            "searchableText CONTAINS[c] $0 OR searchableKeywords CONTAINS[c] $0",
+            query
+        )
+            .find()
+            .map { it.toDomain() }
+    }
+
+    // MARK: - Mapper Extensions
+
+    private fun ChapterEntity.toDomain() = Chapter(
+        identifier = identifier,
+        number = number,
+        isMeccan = isMeccan,
+        title = title,
+        arabicTitle = arabicTitle,
+        englishTitle = englishTitle,
+        titleCodePoint = titleCodePoint,
+        searchableText = searchableText,
+        searchableKeywords = searchableKeywords,
+        versesCount = verses.size
+    )
+
+    private fun VerseEntity.toDomain() = Verse(
+        verseID = verseID,
+        humanReadableID = humanReadableID,
+        number = number,
+        text = text,
+        textWithoutTashkil = textWithoutTashkil,
+        uthmanicHafsText = uthmanicHafsText,
+        hafsSmartText = hafsSmartText,
+        searchableText = searchableText,
+        chapterNumber = chapter?.number ?: 0,
+        pageNumber = page1441?.number ?: 0,
+        partNumber = part?.number ?: 0,
+        hizbNumber = quarter?.hizbNumber ?: 0
+    )
+
+    private fun PageEntity.toDomain() = Page(
+        identifier = identifier,
+        number = number,
+        isRight = isRight
+    )
+
+    private fun PartEntity.toDomain() = Part(
+        identifier = identifier,
+        number = number,
+        arabicTitle = arabicTitle,
+        englishTitle = englishTitle
+    )
+
+    private fun QuarterEntity.toDomain() = Quarter(
+        identifier = identifier,
+        hizbNumber = hizbNumber,
+        hizbFraction = hizbFraction,
+        arabicTitle = arabicTitle,
+        englishTitle = englishTitle,
+        partNumber = part?.number ?: 0
+    )
+}

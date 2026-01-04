@@ -27,8 +27,8 @@ composeNavigation = "2.8.5"
 hilt = "2.54"
 hiltNavigationCompose = "1.2.0"
 
-# Realm
-realm = "2.3.0"
+# Realm - Using 1.16.0 for Kotlin 1.9.x compatibility
+realm = "1.16.0"
 
 # Media3 (Audio playback)
 media3 = "1.5.0"
