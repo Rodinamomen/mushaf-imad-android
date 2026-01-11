@@ -29,12 +29,21 @@ internal class RealmServiceImpl @Inject constructor(
         private const val SCHEMA_VERSION = 26L  // Updated for search history (Week 8)
     }
 
+    init {
+        // Initialize Realm synchronously on construction
+        // This ensures Realm is ready when repositories use this service
+        initializeRealm()
+    }
+
     override val isInitialized: Boolean
         get() = realm != null
 
-    override suspend fun initialize() = withContext(Dispatchers.IO) {
+    /**
+     * Synchronous initialization called from init block
+     */
+    private fun initializeRealm() {
         // Skip if already initialized
-        if (realm != null) return@withContext
+        if (realm != null) return
 
         // Get the bundled Realm file from assets
         val assetManager = context.assets
@@ -86,6 +95,13 @@ internal class RealmServiceImpl @Inject constructor(
 
         configuration = config
         realm = Realm.open(config)
+    }
+
+    /**
+     * Public suspend initialize for manual initialization if needed
+     */
+    override suspend fun initialize() = withContext(Dispatchers.IO) {
+        initializeRealm()
     }
 
     override fun getRealm(): Realm {

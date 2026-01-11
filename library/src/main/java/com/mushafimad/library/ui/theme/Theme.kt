@@ -29,22 +29,10 @@ fun MushafTheme(
     content: @Composable () -> Unit
 ) {
     val materialColorScheme = when (colorScheme) {
-        ColorSchemeType.DEFAULT -> createMaterialColorScheme(
-            ColorSchemes.Default,
-            readingTheme.isDark
-        )
-        ColorSchemeType.WARM -> createMaterialColorScheme(
-            ColorSchemes.Warm,
-            readingTheme.isDark
-        )
-        ColorSchemeType.COOL -> createMaterialColorScheme(
-            ColorSchemes.Cool,
-            readingTheme.isDark
-        )
-        ColorSchemeType.SEPIA -> createMaterialColorScheme(
-            ColorSchemes.Sepia,
-            readingTheme.isDark
-        )
+        ColorSchemeType.DEFAULT -> createDefaultColorScheme(readingTheme.isDark)
+        ColorSchemeType.WARM -> createWarmColorScheme(readingTheme.isDark)
+        ColorSchemeType.COOL -> createCoolColorScheme(readingTheme.isDark)
+        ColorSchemeType.SEPIA -> createSepiaColorScheme(readingTheme.isDark)
     }
 
     // Provide custom reading theme colors
@@ -76,73 +64,207 @@ enum class ColorSchemeType {
 }
 
 /**
- * Create Material3 ColorScheme from our custom color scheme
+ * Create Default ColorScheme
  */
-private fun createMaterialColorScheme(
-    scheme: Any,
-    isDark: Boolean
-): ColorScheme {
-    // Use reflection to get color values from scheme object
-    val schemeClass = scheme::class.java
-
+private fun createDefaultColorScheme(isDark: Boolean): ColorScheme {
     return ColorScheme(
-        primary = getColorField(schemeClass, scheme, "primary"),
-        onPrimary = getColorField(schemeClass, scheme, "onPrimary"),
-        primaryContainer = getColorField(schemeClass, scheme, "primaryContainer"),
-        onPrimaryContainer = getColorField(schemeClass, scheme, "onPrimaryContainer"),
+        primary = ColorSchemes.Default.primary,
+        onPrimary = ColorSchemes.Default.onPrimary,
+        primaryContainer = ColorSchemes.Default.primaryContainer,
+        onPrimaryContainer = ColorSchemes.Default.onPrimaryContainer,
 
-        secondary = getColorField(schemeClass, scheme, "secondary"),
-        onSecondary = getColorField(schemeClass, scheme, "onSecondary"),
-        secondaryContainer = getColorField(schemeClass, scheme, "secondaryContainer"),
-        onSecondaryContainer = getColorField(schemeClass, scheme, "onSecondaryContainer"),
+        secondary = ColorSchemes.Default.secondary,
+        onSecondary = ColorSchemes.Default.onSecondary,
+        secondaryContainer = ColorSchemes.Default.secondaryContainer,
+        onSecondaryContainer = ColorSchemes.Default.onSecondaryContainer,
 
-        tertiary = getColorField(schemeClass, scheme, "tertiary"),
-        onTertiary = getColorField(schemeClass, scheme, "onTertiary"),
-        tertiaryContainer = getColorField(schemeClass, scheme, "tertiaryContainer"),
-        onTertiaryContainer = getColorField(schemeClass, scheme, "onTertiaryContainer"),
+        tertiary = ColorSchemes.Default.tertiary,
+        onTertiary = ColorSchemes.Default.onTertiary,
+        tertiaryContainer = ColorSchemes.Default.tertiaryContainer,
+        onTertiaryContainer = ColorSchemes.Default.onTertiaryContainer,
 
-        error = getColorField(schemeClass, scheme, "error"),
-        onError = getColorField(schemeClass, scheme, "onError"),
-        errorContainer = getColorField(schemeClass, scheme, "errorContainer"),
-        onErrorContainer = getColorField(schemeClass, scheme, "onErrorContainer"),
+        error = ColorSchemes.Default.error,
+        onError = ColorSchemes.Default.onError,
+        errorContainer = ColorSchemes.Default.errorContainer,
+        onErrorContainer = ColorSchemes.Default.onErrorContainer,
 
-        background = getColorField(schemeClass, scheme, "background"),
-        onBackground = getColorField(schemeClass, scheme, "onBackground"),
-        surface = getColorField(schemeClass, scheme, "surface"),
-        onSurface = getColorField(schemeClass, scheme, "onSurface"),
+        background = ColorSchemes.Default.background,
+        onBackground = ColorSchemes.Default.onBackground,
+        surface = ColorSchemes.Default.surface,
+        onSurface = ColorSchemes.Default.onSurface,
 
-        surfaceVariant = getColorField(schemeClass, scheme, "surfaceVariant"),
-        onSurfaceVariant = getColorField(schemeClass, scheme, "onSurfaceVariant"),
-        surfaceTint = getColorField(schemeClass, scheme, "primary"), // Use primary as surface tint
-        outline = getColorField(schemeClass, scheme, "outline"),
-        outlineVariant = getColorField(schemeClass, scheme, "outline"), // Reuse outline
+        surfaceVariant = ColorSchemes.Default.surfaceVariant,
+        onSurfaceVariant = ColorSchemes.Default.onSurfaceVariant,
+        surfaceTint = ColorSchemes.Default.primary,
+        outline = ColorSchemes.Default.outline,
+        outlineVariant = ColorSchemes.Default.outline,
 
         scrim = Color.Black.copy(alpha = 0.32f),
         inverseSurface = if (isDark) Color(0xFFE0E0E0) else Color(0xFF2C2C2C),
         inverseOnSurface = if (isDark) Color(0xFF2C2C2C) else Color(0xFFE0E0E0),
-        inversePrimary = getColorField(schemeClass, scheme, "primary"),
+        inversePrimary = ColorSchemes.Default.primary,
 
-        surfaceDim = getColorField(schemeClass, scheme, "surface"),
-        surfaceBright = getColorField(schemeClass, scheme, "surface"),
-        surfaceContainerLowest = getColorField(schemeClass, scheme, "surface"),
-        surfaceContainerLow = getColorField(schemeClass, scheme, "surface"),
-        surfaceContainer = getColorField(schemeClass, scheme, "surfaceVariant"),
-        surfaceContainerHigh = getColorField(schemeClass, scheme, "surfaceVariant"),
-        surfaceContainerHighest = getColorField(schemeClass, scheme, "surfaceVariant")
+        surfaceDim = ColorSchemes.Default.surface,
+        surfaceBright = ColorSchemes.Default.surface,
+        surfaceContainerLowest = ColorSchemes.Default.surface,
+        surfaceContainerLow = ColorSchemes.Default.surface,
+        surfaceContainer = ColorSchemes.Default.surfaceVariant,
+        surfaceContainerHigh = ColorSchemes.Default.surfaceVariant,
+        surfaceContainerHighest = ColorSchemes.Default.surfaceVariant
     )
 }
 
 /**
- * Get color field from scheme object using reflection
+ * Create Warm ColorScheme
  */
-private fun getColorField(clazz: Class<*>, instance: Any, fieldName: String): Color {
-    return try {
-        val field = clazz.getDeclaredField(fieldName)
-        field.isAccessible = true
-        field.get(instance) as Color
-    } catch (e: Exception) {
-        Color.Magenta // Fallback color to make missing fields obvious
-    }
+private fun createWarmColorScheme(isDark: Boolean): ColorScheme {
+    return ColorScheme(
+        primary = ColorSchemes.Warm.primary,
+        onPrimary = ColorSchemes.Warm.onPrimary,
+        primaryContainer = ColorSchemes.Warm.primaryContainer,
+        onPrimaryContainer = ColorSchemes.Warm.onPrimaryContainer,
+
+        secondary = ColorSchemes.Warm.secondary,
+        onSecondary = ColorSchemes.Warm.onSecondary,
+        secondaryContainer = ColorSchemes.Warm.secondaryContainer,
+        onSecondaryContainer = ColorSchemes.Warm.onSecondaryContainer,
+
+        tertiary = ColorSchemes.Warm.tertiary,
+        onTertiary = ColorSchemes.Warm.onTertiary,
+        tertiaryContainer = ColorSchemes.Warm.tertiaryContainer,
+        onTertiaryContainer = ColorSchemes.Warm.onTertiaryContainer,
+
+        error = ColorSchemes.Warm.error,
+        onError = ColorSchemes.Warm.onError,
+        errorContainer = ColorSchemes.Warm.errorContainer,
+        onErrorContainer = ColorSchemes.Warm.onErrorContainer,
+
+        background = ColorSchemes.Warm.background,
+        onBackground = ColorSchemes.Warm.onBackground,
+        surface = ColorSchemes.Warm.surface,
+        onSurface = ColorSchemes.Warm.onSurface,
+
+        surfaceVariant = ColorSchemes.Warm.surfaceVariant,
+        onSurfaceVariant = ColorSchemes.Warm.onSurfaceVariant,
+        surfaceTint = ColorSchemes.Warm.primary,
+        outline = ColorSchemes.Warm.outline,
+        outlineVariant = ColorSchemes.Warm.outline,
+
+        scrim = Color.Black.copy(alpha = 0.32f),
+        inverseSurface = if (isDark) Color(0xFFE0E0E0) else Color(0xFF2C2C2C),
+        inverseOnSurface = if (isDark) Color(0xFF2C2C2C) else Color(0xFFE0E0E0),
+        inversePrimary = ColorSchemes.Warm.primary,
+
+        surfaceDim = ColorSchemes.Warm.surface,
+        surfaceBright = ColorSchemes.Warm.surface,
+        surfaceContainerLowest = ColorSchemes.Warm.surface,
+        surfaceContainerLow = ColorSchemes.Warm.surface,
+        surfaceContainer = ColorSchemes.Warm.surfaceVariant,
+        surfaceContainerHigh = ColorSchemes.Warm.surfaceVariant,
+        surfaceContainerHighest = ColorSchemes.Warm.surfaceVariant
+    )
+}
+
+/**
+ * Create Cool ColorScheme
+ */
+private fun createCoolColorScheme(isDark: Boolean): ColorScheme {
+    return ColorScheme(
+        primary = ColorSchemes.Cool.primary,
+        onPrimary = ColorSchemes.Cool.onPrimary,
+        primaryContainer = ColorSchemes.Cool.primaryContainer,
+        onPrimaryContainer = ColorSchemes.Cool.onPrimaryContainer,
+
+        secondary = ColorSchemes.Cool.secondary,
+        onSecondary = ColorSchemes.Cool.onSecondary,
+        secondaryContainer = ColorSchemes.Cool.secondaryContainer,
+        onSecondaryContainer = ColorSchemes.Cool.onSecondaryContainer,
+
+        tertiary = ColorSchemes.Cool.tertiary,
+        onTertiary = ColorSchemes.Cool.onTertiary,
+        tertiaryContainer = ColorSchemes.Cool.tertiaryContainer,
+        onTertiaryContainer = ColorSchemes.Cool.onTertiaryContainer,
+
+        error = ColorSchemes.Cool.error,
+        onError = ColorSchemes.Cool.onError,
+        errorContainer = ColorSchemes.Cool.errorContainer,
+        onErrorContainer = ColorSchemes.Cool.onErrorContainer,
+
+        background = ColorSchemes.Cool.background,
+        onBackground = ColorSchemes.Cool.onBackground,
+        surface = ColorSchemes.Cool.surface,
+        onSurface = ColorSchemes.Cool.onSurface,
+
+        surfaceVariant = ColorSchemes.Cool.surfaceVariant,
+        onSurfaceVariant = ColorSchemes.Cool.onSurfaceVariant,
+        surfaceTint = ColorSchemes.Cool.primary,
+        outline = ColorSchemes.Cool.outline,
+        outlineVariant = ColorSchemes.Cool.outline,
+
+        scrim = Color.Black.copy(alpha = 0.32f),
+        inverseSurface = if (isDark) Color(0xFFE0E0E0) else Color(0xFF2C2C2C),
+        inverseOnSurface = if (isDark) Color(0xFF2C2C2C) else Color(0xFFE0E0E0),
+        inversePrimary = ColorSchemes.Cool.primary,
+
+        surfaceDim = ColorSchemes.Cool.surface,
+        surfaceBright = ColorSchemes.Cool.surface,
+        surfaceContainerLowest = ColorSchemes.Cool.surface,
+        surfaceContainerLow = ColorSchemes.Cool.surface,
+        surfaceContainer = ColorSchemes.Cool.surfaceVariant,
+        surfaceContainerHigh = ColorSchemes.Cool.surfaceVariant,
+        surfaceContainerHighest = ColorSchemes.Cool.surfaceVariant
+    )
+}
+
+/**
+ * Create Sepia ColorScheme
+ */
+private fun createSepiaColorScheme(isDark: Boolean): ColorScheme {
+    return ColorScheme(
+        primary = ColorSchemes.Sepia.primary,
+        onPrimary = ColorSchemes.Sepia.onPrimary,
+        primaryContainer = ColorSchemes.Sepia.primaryContainer,
+        onPrimaryContainer = ColorSchemes.Sepia.onPrimaryContainer,
+
+        secondary = ColorSchemes.Sepia.secondary,
+        onSecondary = ColorSchemes.Sepia.onSecondary,
+        secondaryContainer = ColorSchemes.Sepia.secondaryContainer,
+        onSecondaryContainer = ColorSchemes.Sepia.onSecondaryContainer,
+
+        tertiary = ColorSchemes.Sepia.tertiary,
+        onTertiary = ColorSchemes.Sepia.onTertiary,
+        tertiaryContainer = ColorSchemes.Sepia.tertiaryContainer,
+        onTertiaryContainer = ColorSchemes.Sepia.onTertiaryContainer,
+
+        error = ColorSchemes.Sepia.error,
+        onError = ColorSchemes.Sepia.onError,
+        errorContainer = ColorSchemes.Sepia.errorContainer,
+        onErrorContainer = ColorSchemes.Sepia.onErrorContainer,
+
+        background = ColorSchemes.Sepia.background,
+        onBackground = ColorSchemes.Sepia.onBackground,
+        surface = ColorSchemes.Sepia.surface,
+        onSurface = ColorSchemes.Sepia.onSurface,
+
+        surfaceVariant = ColorSchemes.Sepia.surfaceVariant,
+        onSurfaceVariant = ColorSchemes.Sepia.onSurfaceVariant,
+        surfaceTint = ColorSchemes.Sepia.primary,
+        outline = ColorSchemes.Sepia.outline,
+        outlineVariant = ColorSchemes.Sepia.outline,
+
+        scrim = Color.Black.copy(alpha = 0.32f),
+        inverseSurface = if (isDark) Color(0xFFE0E0E0) else Color(0xFF2C2C2C),
+        inverseOnSurface = if (isDark) Color(0xFF2C2C2C) else Color(0xFFE0E0E0),
+        inversePrimary = ColorSchemes.Sepia.primary,
+
+        surfaceDim = ColorSchemes.Sepia.surface,
+        surfaceBright = ColorSchemes.Sepia.surface,
+        surfaceContainerLowest = ColorSchemes.Sepia.surface,
+        surfaceContainerLow = ColorSchemes.Sepia.surface,
+        surfaceContainer = ColorSchemes.Sepia.surfaceVariant,
+        surfaceContainerHigh = ColorSchemes.Sepia.surfaceVariant,
+        surfaceContainerHighest = ColorSchemes.Sepia.surfaceVariant
+    )
 }
 
 /**
