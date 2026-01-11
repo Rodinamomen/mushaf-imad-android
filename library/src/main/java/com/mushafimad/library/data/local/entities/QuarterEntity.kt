@@ -11,6 +11,7 @@ import io.realm.kotlin.types.annotations.PrimaryKey
  * Represents one-quarter of a Hizb
  * Schema version: 24 (compatible with iOS)
  */
+@io.realm.kotlin.types.annotations.PersistedName("Quarter")
 class QuarterEntity : RealmObject {
     @PrimaryKey
     var identifier: Int = 0

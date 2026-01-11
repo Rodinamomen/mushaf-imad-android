@@ -11,6 +11,7 @@ import io.realm.kotlin.types.annotations.PrimaryKey
  * Represents a single page in the Mushaf
  * Schema version: 24 (compatible with iOS)
  */
+@io.realm.kotlin.types.annotations.PersistedName("Page")
 class PageEntity : RealmObject {
     @PrimaryKey
     var identifier: Int = 0

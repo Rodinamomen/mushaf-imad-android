@@ -11,6 +11,7 @@ import io.realm.kotlin.types.annotations.PrimaryKey
  * Represents one of the 30 parts of the Quran
  * Schema version: 24 (compatible with iOS)
  */
+@io.realm.kotlin.types.annotations.PersistedName("Part")
 class PartEntity : RealmObject {
     @PrimaryKey
     var identifier: Int = 0

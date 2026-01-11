@@ -10,6 +10,7 @@ import io.realm.kotlin.types.annotations.PrimaryKey
  * Realm entity for Quran Verse (Ayah)
  * Schema version: 24 (compatible with iOS)
  */
+@io.realm.kotlin.types.annotations.PersistedName("Verse")
 class VerseEntity : RealmObject {
     @PrimaryKey
     var verseID: Int = 0

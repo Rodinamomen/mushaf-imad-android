@@ -23,10 +23,13 @@ import com.mushafimad.library.ui.theme.*
 import kotlinx.coroutines.delay
 
 /**
- * MushafView - Main composable for displaying Quran pages
+ * MushafView - Main composable for displaying Quran pages using images
  *
- * Public API for the library. Displays Quran pages with proper Arabic text,
- * RTL layout, reading themes, and navigation controls.
+ * Matches iOS implementation using line images instead of text rendering
+ * Images are loaded from assets/quran-images/{page}/{line}.png
+ *
+ * Public API for the library. Displays Quran pages with proper Arabic layout,
+ * reading themes, and navigation controls.
  *
  * Usage:
  * ```
@@ -125,7 +128,7 @@ fun MushafView(
                 uiState.verses.isNotEmpty() -> {
                     var swipeOffset by remember { mutableStateOf(0f) }
 
-                    PageComponent(
+                    QuranPageView(
                         verses = uiState.verses,
                         chapters = uiState.chapters,
                         pageNumber = uiState.currentPage,
@@ -134,10 +137,6 @@ fun MushafView(
                         onVerseClick = { verse ->
                             viewModel.selectVerse(verse)
                             onVerseSelected?.invoke(verse)
-                        },
-                        scrollToPosition = uiState.scrollPosition,
-                        onScrollPositionChange = { position ->
-                            viewModel.updateScrollPosition(position)
                         },
                         modifier = Modifier
                             .fillMaxSize()

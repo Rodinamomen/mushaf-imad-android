@@ -26,7 +26,7 @@ internal class RealmServiceImpl @Inject constructor(
 
     companion object {
         private const val REALM_FILE_NAME = "quran.realm"
-        private const val SCHEMA_VERSION = 26L  // Updated for search history (Week 8)
+        private const val SCHEMA_VERSION = 24L  // Match bundled file schema version
     }
 
     init {
@@ -63,18 +63,24 @@ internal class RealmServiceImpl @Inject constructor(
         println("RealmService: Realm file path: ${realmFile.absolutePath}")
         println("RealmService: Realm file exists: ${realmFile.exists()}, size: ${if (realmFile.exists()) realmFile.length() else 0} bytes")
 
-        // Copy the bundled Realm file to internal storage if it doesn't exist
-        if (!realmFile.exists()) {
-            println("RealmService: Copying realm file from assets...")
-            realmInputStream.use { input ->
-                realmFile.outputStream().use { output ->
-                    input.copyTo(output)
-                }
-            }
-            println("RealmService: Copied realm file, new size: ${realmFile.length()} bytes")
-        } else {
-            println("RealmService: Using existing realm file")
+        // TEMPORARY: Force fresh copy from assets to fix schema mismatch
+        // Delete existing file if it exists
+        if (realmFile.exists()) {
+            println("RealmService: Deleting existing realm file to force fresh copy...")
+            realmFile.delete()
+            // Also delete lock files
+            File(appFilesDir, "$REALM_FILE_NAME.lock").delete()
+            File(appFilesDir, "$REALM_FILE_NAME.management").delete()
         }
+
+        // Copy the bundled Realm file from assets
+        println("RealmService: Copying realm file from assets...")
+        realmInputStream.use { input ->
+            realmFile.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
+        println("RealmService: Copied realm file, new size: ${realmFile.length()} bytes")
 
         // Configure Realm
         val config = RealmConfiguration.Builder(

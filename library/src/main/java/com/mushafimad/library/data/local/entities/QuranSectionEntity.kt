@@ -9,6 +9,7 @@ import io.realm.kotlin.types.annotations.PrimaryKey
  * Realm entity for Quran Section
  * Groups verses into logical sections
  */
+@io.realm.kotlin.types.annotations.PersistedName("QuranSection")
 class QuranSectionEntity : RealmObject {
     @PrimaryKey
     var identifier: Int = 0

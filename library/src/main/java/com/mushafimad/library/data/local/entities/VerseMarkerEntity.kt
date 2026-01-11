@@ -6,6 +6,7 @@ import io.realm.kotlin.types.RealmObject
  * Realm entity for verse number marker position
  * Contains the Unicode code point for the verse number and its display coordinates
  */
+@io.realm.kotlin.types.annotations.PersistedName("VerseMarker")
 class VerseMarkerEntity : RealmObject {
     var numberCodePoint: String = ""
     var line: Int = 0

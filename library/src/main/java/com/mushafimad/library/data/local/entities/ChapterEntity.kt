@@ -9,7 +9,9 @@ import io.realm.kotlin.types.annotations.PrimaryKey
 /**
  * Realm entity for Quran Chapter (Surah)
  * Schema version: 24 (compatible with iOS)
+ * Maps to "Chapter" table in bundled iOS realm file
  */
+@io.realm.kotlin.types.annotations.PersistedName("Chapter")
 class ChapterEntity : RealmObject {
     @PrimaryKey
     var identifier: Int = 0
