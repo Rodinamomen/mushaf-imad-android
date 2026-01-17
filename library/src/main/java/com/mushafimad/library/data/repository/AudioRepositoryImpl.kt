@@ -1,8 +1,8 @@
 package com.mushafimad.library.data.repository
 
-import com.mushafimad.library.data.audio.AudioPlayerService
 import com.mushafimad.library.data.audio.AudioPlayerState
 import com.mushafimad.library.data.audio.AyahTimingService
+import com.mushafimad.library.data.audio.MediaSessionManager
 import com.mushafimad.library.data.audio.ReciterDataProvider
 import com.mushafimad.library.domain.models.AyahTiming
 import com.mushafimad.library.domain.models.ReciterInfo
@@ -17,9 +17,14 @@ import javax.inject.Singleton
  */
 @Singleton
 internal class AudioRepositoryImpl @Inject constructor(
-    private val audioPlayerService: AudioPlayerService,
+    private val mediaSessionManager: MediaSessionManager,
     private val ayahTimingService: AyahTimingService
 ) : AudioRepository {
+
+    init {
+        // Initialize MediaSessionManager
+        mediaSessionManager.initialize()
+    }
 
     // Reciter operations
     override fun getAllReciters(): List<ReciterInfo> {
@@ -44,51 +49,55 @@ internal class AudioRepositoryImpl @Inject constructor(
 
     // Playback control
     override fun getPlayerStateFlow(): Flow<AudioPlayerState> {
-        return audioPlayerService.playerState
+        return mediaSessionManager.playerState
     }
 
     override fun loadChapter(chapterNumber: Int, reciterId: Int, autoPlay: Boolean) {
-        audioPlayerService.loadChapter(chapterNumber, reciterId, autoPlay)
+        mediaSessionManager.loadChapter(chapterNumber, reciterId, autoPlay)
     }
 
     override fun play() {
-        audioPlayerService.play()
+        mediaSessionManager.play()
     }
 
     override fun pause() {
-        audioPlayerService.pause()
+        mediaSessionManager.pause()
     }
 
     override fun stop() {
-        audioPlayerService.stop()
+        mediaSessionManager.stop()
     }
 
     override fun seekTo(positionMs: Long) {
-        audioPlayerService.seekTo(positionMs)
+        mediaSessionManager.seekTo(positionMs)
     }
 
     override fun setPlaybackSpeed(speed: Float) {
-        audioPlayerService.setPlaybackSpeed(speed)
+        mediaSessionManager.setPlaybackSpeed(speed)
     }
 
     override fun setRepeatMode(enabled: Boolean) {
-        audioPlayerService.setRepeatMode(enabled)
+        // Note: MediaSessionManager uses toggleRepeat(), so we need to check current state
+        val currentState = mediaSessionManager.playerState.value.isRepeatEnabled
+        if (currentState != enabled) {
+            mediaSessionManager.toggleRepeat()
+        }
     }
 
     override fun isRepeatEnabled(): Boolean {
-        return audioPlayerService.isRepeatEnabled()
+        return mediaSessionManager.playerState.value.isRepeatEnabled
     }
 
     override fun getCurrentPosition(): Long {
-        return audioPlayerService.getCurrentPosition()
+        return mediaSessionManager.getCurrentPosition()
     }
 
     override fun getDuration(): Long {
-        return audioPlayerService.getDuration()
+        return mediaSessionManager.getDuration()
     }
 
     override fun isPlaying(): Boolean {
-        return audioPlayerService.isPlaying()
+        return mediaSessionManager.isPlaying()
     }
 
     // Timing operations
@@ -114,6 +123,6 @@ internal class AudioRepositoryImpl @Inject constructor(
 
     // Lifecycle
     override fun release() {
-        audioPlayerService.release()
+        mediaSessionManager.release()
     }
 }

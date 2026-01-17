@@ -7,6 +7,7 @@ import androidx.annotation.OptIn
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
@@ -19,6 +20,14 @@ import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import com.mushafimad.library.MushafLibrary
+import com.mushafimad.library.domain.repository.ChapterRepository
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * Commands for custom actions
@@ -42,11 +51,16 @@ private const val ARG_SPEED = "speed"
  * - Bluetooth headset controls
  * - Android Auto integration
  */
+@AndroidEntryPoint
 @OptIn(UnstableApi::class)
 class AudioPlaybackService : MediaSessionService() {
 
+    @Inject
+    lateinit var chapterRepository: ChapterRepository
+
     private var mediaSession: MediaSession? = null
     private lateinit var player: ExoPlayer
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     private var currentChapter: Int? = null
     private var currentReciterId: Int? = null
@@ -121,6 +135,9 @@ class AudioPlaybackService : MediaSessionService() {
             release()
             mediaSession = null
         }
+
+        // Cancel all coroutines
+        serviceScope.coroutineContext.cancel()
 
         super.onDestroy()
     }
@@ -201,25 +218,47 @@ class AudioPlaybackService : MediaSessionService() {
      * Load and prepare audio for a specific chapter and reciter
      */
     private fun loadChapter(chapterNumber: Int, reciterId: Int) {
-        try {
-            val reciter = ReciterDataProvider.getReciterById(reciterId)
-            if (reciter == null) {
-                MushafLibrary.logger.error("Reciter not found: $reciterId")
-                return
+        serviceScope.launch {
+            try {
+                val reciter = ReciterDataProvider.getReciterById(reciterId)
+                if (reciter == null) {
+                    MushafLibrary.logger.error("Reciter not found: $reciterId")
+                    return@launch
+                }
+
+                val audioUrl = reciter.getAudioUrl(chapterNumber)
+                MushafLibrary.logger.info("Loading audio: $audioUrl")
+
+                currentChapter = chapterNumber
+                currentReciterId = reciterId
+
+                // Fetch chapter metadata for notification
+                val chapter = chapterRepository.getChapter(chapterNumber)
+                val chapterTitle = chapter?.arabicTitle ?: "سورة $chapterNumber"
+                val reciterName = reciter.nameArabic
+
+                // Create MediaItem with metadata for notification
+                val mediaMetadata = MediaMetadata.Builder()
+                    .setTitle(chapterTitle)
+                    .setArtist(reciterName)
+                    .setDisplayTitle(chapterTitle)
+                    .setSubtitle(reciterName)
+                    .setAlbumTitle("القرآن الكريم") // "The Holy Quran"
+                    .build()
+
+                val mediaItem = MediaItem.Builder()
+                    .setUri(audioUrl)
+                    .setMediaMetadata(mediaMetadata)
+                    .build()
+
+                player.setMediaItem(mediaItem)
+                player.prepare()
+                player.play()
+
+                MushafLibrary.logger.info("Playing: $chapterTitle by $reciterName")
+            } catch (e: Exception) {
+                MushafLibrary.logger.error("Failed to load chapter", e)
             }
-
-            val audioUrl = reciter.getAudioUrl(chapterNumber)
-            MushafLibrary.logger.info("Loading audio: $audioUrl")
-
-            currentChapter = chapterNumber
-            currentReciterId = reciterId
-
-            val mediaItem = MediaItem.fromUri(audioUrl)
-            player.setMediaItem(mediaItem)
-            player.prepare()
-            player.play()
-        } catch (e: Exception) {
-            MushafLibrary.logger.error("Failed to load chapter", e)
         }
     }
 }

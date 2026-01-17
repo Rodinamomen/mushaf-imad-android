@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.os.Bundle
 import androidx.annotation.OptIn
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionCommand
@@ -15,12 +16,51 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
+
+/**
+ * Playback states for audio player
+ */
+enum class PlaybackState {
+    IDLE,
+    LOADING,
+    PLAYING,
+    PAUSED,
+    STOPPED,
+    ERROR
+}
+
+/**
+ * Audio player state containing playback information
+ */
+data class AudioPlayerState(
+    val playbackState: PlaybackState = PlaybackState.IDLE,
+    val currentPositionMs: Long = 0,
+    val durationMs: Long = 0,
+    val currentChapter: Int? = null,
+    val currentReciterId: Int? = null,
+    val isBuffering: Boolean = false,
+    val isRepeatEnabled: Boolean = false,
+    val errorMessage: String? = null
+) {
+    val progressPercentage: Float
+        get() = if (durationMs > 0) {
+            (currentPositionMs.toFloat() / durationMs.toFloat()) * 100f
+        } else 0f
+
+    val remainingTimeMs: Long
+        get() = (durationMs - currentPositionMs).coerceAtLeast(0)
+
+    val isPlaying: Boolean
+        get() = playbackState == PlaybackState.PLAYING
+}
 
 /**
  * Manager for MediaSession connections to AudioPlaybackService
@@ -44,6 +84,12 @@ class MediaSessionManager @Inject constructor(
     private val _isConnected = MutableStateFlow(false)
     val isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
 
+    private val _playerState = MutableStateFlow(AudioPlayerState())
+    val playerState: StateFlow<AudioPlayerState> = _playerState.asStateFlow()
+
+    private var currentChapter: Int? = null
+    private var currentReciterId: Int? = null
+
     /**
      * Initialize and connect to AudioPlaybackService
      */
@@ -66,6 +112,8 @@ class MediaSessionManager @Inject constructor(
                 try {
                     mediaController = controllerFuture?.get()
                     _isConnected.value = true
+                    setupPlayerListener()
+                    startStatePolling()
                     MushafLibrary.logger.info("MediaController connected successfully")
                 } catch (e: Exception) {
                     MushafLibrary.logger.error("Failed to connect MediaController", e)
@@ -77,10 +125,69 @@ class MediaSessionManager @Inject constructor(
     }
 
     /**
+     * Setup listener for player state changes
+     */
+    private fun setupPlayerListener() {
+        mediaController?.addListener(object : Player.Listener {
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                updatePlayerState()
+            }
+
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                updatePlayerState()
+            }
+
+            override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
+                MushafLibrary.logger.error("Playback error: ${error.message}", error)
+                _playerState.value = _playerState.value.copy(
+                    playbackState = PlaybackState.ERROR,
+                    errorMessage = error.message ?: "Unknown error"
+                )
+            }
+        })
+    }
+
+    /**
+     * Start polling for player state updates
+     */
+    private fun startStatePolling() {
+        scope.launch {
+            while (isActive) {
+                updatePlayerState()
+                delay(100) // Update every 100ms
+            }
+        }
+    }
+
+    /**
+     * Update player state from MediaController
+     */
+    private fun updatePlayerState() {
+        val controller = mediaController ?: return
+
+        val playbackState = when {
+            controller.isPlaying -> PlaybackState.PLAYING
+            controller.currentPosition > 0 || controller.duration > 0 -> PlaybackState.PAUSED
+            else -> PlaybackState.IDLE
+        }
+
+        _playerState.value = _playerState.value.copy(
+            playbackState = playbackState,
+            currentPositionMs = controller.currentPosition,
+            durationMs = controller.duration.let { if (it < 0) 0 else it },
+            currentChapter = currentChapter,
+            currentReciterId = currentReciterId
+        )
+    }
+
+    /**
      * Load and play a chapter with specified reciter
      */
     fun loadChapter(chapterNumber: Int, reciterId: Int, autoPlay: Boolean = true) {
         scope.launch {
+            currentChapter = chapterNumber
+            currentReciterId = reciterId
+
             val args = Bundle().apply {
                 putInt("chapter_number", chapterNumber)
                 putInt("reciter_id", reciterId)

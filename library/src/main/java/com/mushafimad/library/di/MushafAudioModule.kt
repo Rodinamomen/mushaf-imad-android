@@ -1,7 +1,7 @@
 package com.mushafimad.library.di
 
-import com.mushafimad.library.data.audio.AudioPlayerService
 import com.mushafimad.library.data.audio.AyahTimingService
+import com.mushafimad.library.data.audio.MediaSessionManager
 import com.mushafimad.library.data.repository.AudioRepositoryImpl
 import com.mushafimad.library.domain.repository.AudioRepository
 import dagger.Module
@@ -12,7 +12,7 @@ import javax.inject.Singleton
 
 /**
  * Hilt module providing audio playback dependencies
- * Includes Media3 ExoPlayer, audio session management, and recitation services
+ * Includes Media3 MediaSession, background playback, and recitation services
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -24,7 +24,7 @@ object MushafAudioModule {
     @Provides
     @Singleton
     internal fun provideAudioRepository(
-        audioPlayerService: AudioPlayerService,
+        mediaSessionManager: MediaSessionManager,
         ayahTimingService: AyahTimingService
-    ): AudioRepository = AudioRepositoryImpl(audioPlayerService, ayahTimingService)
+    ): AudioRepository = AudioRepositoryImpl(mediaSessionManager, ayahTimingService)
 }
