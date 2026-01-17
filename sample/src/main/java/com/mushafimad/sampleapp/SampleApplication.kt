@@ -2,8 +2,6 @@ package com.mushafimad.sampleapp
 
 import android.app.Application
 import com.mushafimad.core.MushafLibrary
-import com.mushafimad.ui.di.uiModule
-import org.koin.core.context.loadKoinModules
 
 class SampleApplication : Application() {
 
@@ -11,10 +9,8 @@ class SampleApplication : Application() {
         super.onCreate()
 
         // Library auto-initializes via ContentProvider!
-        // Koin is started with coreModule automatically
-
-        // Load UI module for ViewModels
-        loadKoinModules(uiModule)
+        // Koin starts automatically and auto-discovers uiModule
+        // ✨ Zero configuration required! ✨
 
         // Optional: Initialize manually with custom logger/analytics
         // MushafLibrary.initialize(

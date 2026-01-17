@@ -23,8 +23,8 @@ import org.koin.core.logger.Level
  * 2. Koin DI (dependency injection for ViewModels and repositories)
  * 3. MushafLibrary (public API setup)
  *
- * No consumer code is required - the library initializes automatically when the
- * ContentProvider is created by the Android system.
+ * Note: If using mushaf-ui module, it has its own ContentProvider that loads
+ * the UI module automatically. No consumer code is required.
  *
  * @internal This class is not part of the public API.
  */
@@ -43,7 +43,7 @@ internal class MushafInitProvider : ContentProvider() {
         // This calls ServiceRegistry.initialize() internally
         MushafLibrary.initializeInternal(context.applicationContext)
 
-        // 2. Initialize Koin DI
+        // 2. Initialize Koin DI with coreModule
         startKoin {
             androidLogger(Level.ERROR) // Only log errors
             androidContext(context.applicationContext)
