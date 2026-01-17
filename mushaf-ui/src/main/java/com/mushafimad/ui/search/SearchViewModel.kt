@@ -2,7 +2,6 @@ package com.mushafimad.ui.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mushafimad.core.MushafLibrary
 import com.mushafimad.core.domain.models.*
 import com.mushafimad.core.domain.repository.*
 import kotlinx.coroutines.flow.MutableStateFlow

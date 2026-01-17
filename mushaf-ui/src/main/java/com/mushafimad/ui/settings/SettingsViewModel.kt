@@ -2,7 +2,6 @@ package com.mushafimad.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mushafimad.core.MushafLibrary
 import com.mushafimad.core.domain.models.MushafType
 import com.mushafimad.core.domain.models.UserDataBackup
 import com.mushafimad.core.domain.repository.DataExportRepository

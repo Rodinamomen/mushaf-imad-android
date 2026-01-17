@@ -2,7 +2,6 @@ package com.mushafimad.ui.theme
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mushafimad.core.MushafLibrary
 import com.mushafimad.core.domain.models.ColorScheme
 import com.mushafimad.core.domain.models.ThemeConfig
 import com.mushafimad.core.domain.models.ThemeMode
