@@ -521,6 +521,7 @@ Developed with care for the Muslim community.
 
 **Based on:**
 - iOS MushafImad library by [Ibrahim Qraiqe (ibo2001)](https://github.com/ibo2001/MushafImad)
+- Quran Android by [Quran.com](https://github.com/quran/quran_android)
 
 **Acknowledgments:**
 - Quran text and metadata
