@@ -5,27 +5,16 @@ import com.mushafimad.core.domain.models.MushafType
 import com.mushafimad.core.domain.models.Page
 import com.mushafimad.core.domain.models.PageHeaderInfo
 import com.mushafimad.core.domain.repository.PageRepository
-import com.mushafimad.core.internal.ServiceRegistry
 
 /**
  * Default implementation of PageRepository
  * Internal API - not exposed to library consumers
  */
-internal class DefaultPageRepository private constructor(
+internal class DefaultPageRepository (
     private val realmService: RealmService,
     private val cacheService: QuranDataCacheService
 ) : PageRepository {
 
-    companion object {
-        @Volatile private var instance: DefaultPageRepository? = null
-
-        fun getInstance(): PageRepository = instance ?: synchronized(this) {
-            instance ?: DefaultPageRepository(
-                ServiceRegistry.getRealmService(),
-                ServiceRegistry.getQuranCacheService()
-            ).also { instance = it }
-        }
-    }
 
     override suspend fun getPage(number: Int): Page? {
         return realmService.getPage(number)

@@ -6,29 +6,17 @@ import com.mushafimad.core.data.cache.QuranDataCacheService
 import com.mushafimad.core.domain.models.Part
 import com.mushafimad.core.domain.models.Quarter
 import com.mushafimad.core.domain.repository.QuranRepository
-import com.mushafimad.core.internal.ServiceRegistry
 
 /**
  * Default implementation of QuranRepository
  * Internal API - not exposed to library consumers
  */
-internal class DefaultQuranRepository private constructor(
+internal class DefaultQuranRepository (
     private val realmService: RealmService,
     private val chaptersDataCache: ChaptersDataCache,
     private val quranDataCacheService: QuranDataCacheService
 ) : QuranRepository {
 
-    companion object {
-        @Volatile private var instance: DefaultQuranRepository? = null
-
-        fun getInstance(): QuranRepository = instance ?: synchronized(this) {
-            instance ?: DefaultQuranRepository(
-                ServiceRegistry.getRealmService(),
-                ServiceRegistry.getChaptersCache(),
-                ServiceRegistry.getQuranCacheService()
-            ).also { instance = it }
-        }
-    }
 
     override suspend fun initialize() {
         realmService.initialize()

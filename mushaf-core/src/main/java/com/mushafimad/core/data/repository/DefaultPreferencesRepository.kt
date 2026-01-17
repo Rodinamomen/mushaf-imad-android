@@ -6,7 +6,6 @@ import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import com.mushafimad.core.domain.models.MushafType
 import com.mushafimad.core.domain.repository.PreferencesRepository
-import com.mushafimad.core.internal.ServiceRegistry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -17,21 +16,13 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
  * Implementation of PreferencesRepository using DataStore
  * Internal API - not exposed to library consumers
  */
-internal class DefaultPreferencesRepository private constructor(
+internal class DefaultPreferencesRepository (
     private val context: Context
 ) : PreferencesRepository {
 
     private val dataStore = context.dataStore
 
     companion object {
-        @Volatile private var instance: DefaultPreferencesRepository? = null
-
-        fun getInstance(): PreferencesRepository = instance ?: synchronized(this) {
-            instance ?: DefaultPreferencesRepository(
-                ServiceRegistry.getContext()
-            ).also { instance = it }
-        }
-
         private val MUSHAF_TYPE_KEY = stringPreferencesKey("mushaf_type")
         private val CURRENT_PAGE_KEY = intPreferencesKey("current_page")
         private val LAST_READ_CHAPTER_KEY = intPreferencesKey("last_read_chapter")

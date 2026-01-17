@@ -1,13 +1,14 @@
 package com.mushafimad.core
 
 import android.content.Context
-import com.mushafimad.core.data.repository.*
 import com.mushafimad.core.domain.repository.*
 import com.mushafimad.core.internal.ServiceRegistry
 import com.mushafimad.core.logging.DefaultMushafLogger
 import com.mushafimad.core.logging.MushafAnalytics
 import com.mushafimad.core.logging.MushafLogger
 import com.mushafimad.core.logging.NoOpMushafAnalytics
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 
 /**
  * Main entry point for MushafImad library
@@ -37,7 +38,7 @@ import com.mushafimad.core.logging.NoOpMushafAnalytics
  * val chapters = quranRepo.getAllChapters()
  * ```
  */
-object MushafLibrary {
+object MushafLibrary : KoinComponent {
 
     private var isInitialized = false
     private var applicationContext: Context? = null
@@ -128,106 +129,82 @@ object MushafLibrary {
      * @return QuranRepository singleton instance
      */
     @JvmStatic
-    fun getQuranRepository(): QuranRepository {
-        return DefaultQuranRepository.getInstance()
-    }
+    fun getQuranRepository(): QuranRepository = get()
 
     /**
      * Get ChapterRepository for accessing chapter (surah) data
      * @return ChapterRepository singleton instance
      */
     @JvmStatic
-    fun getChapterRepository(): ChapterRepository {
-        return DefaultChapterRepository.getInstance()
-    }
+    fun getChapterRepository(): ChapterRepository = get()
 
     /**
      * Get PageRepository for accessing page data
      * @return PageRepository singleton instance
      */
     @JvmStatic
-    fun getPageRepository(): PageRepository {
-        return DefaultPageRepository.getInstance()
-    }
+    fun getPageRepository(): PageRepository = get()
 
     /**
      * Get VerseRepository for accessing verse (ayah) data
      * @return VerseRepository singleton instance
      */
     @JvmStatic
-    fun getVerseRepository(): VerseRepository {
-        return DefaultVerseRepository.getInstance()
-    }
+    fun getVerseRepository(): VerseRepository = get()
 
     /**
      * Get BookmarkRepository for managing bookmarks
      * @return BookmarkRepository singleton instance
      */
     @JvmStatic
-    fun getBookmarkRepository(): BookmarkRepository {
-        return DefaultBookmarkRepository.getInstance()
-    }
+    fun getBookmarkRepository(): BookmarkRepository = get()
 
     /**
      * Get ReadingHistoryRepository for managing reading history
      * @return ReadingHistoryRepository singleton instance
      */
     @JvmStatic
-    fun getReadingHistoryRepository(): ReadingHistoryRepository {
-        return DefaultReadingHistoryRepository.getInstance()
-    }
+    fun getReadingHistoryRepository(): ReadingHistoryRepository = get()
 
     /**
      * Get SearchHistoryRepository for managing search history
      * @return SearchHistoryRepository singleton instance
      */
     @JvmStatic
-    fun getSearchHistoryRepository(): SearchHistoryRepository {
-        return DefaultSearchHistoryRepository.getInstance()
-    }
+    fun getSearchHistoryRepository(): SearchHistoryRepository = get()
 
     /**
      * Get AudioRepository for audio playback and reciter management
      * @return AudioRepository singleton instance
      */
     @JvmStatic
-    fun getAudioRepository(): AudioRepository {
-        return DefaultAudioRepository.getInstance()
-    }
+    fun getAudioRepository(): AudioRepository = get()
 
     /**
      * Get PreferencesRepository for managing app preferences
      * @return PreferencesRepository singleton instance
      */
     @JvmStatic
-    fun getPreferencesRepository(): PreferencesRepository {
-        return DefaultPreferencesRepository.getInstance()
-    }
+    fun getPreferencesRepository(): PreferencesRepository = get()
 
     /**
      * Get ReciterPreferencesRepository for managing reciter-specific preferences
      * @return ReciterPreferencesRepository singleton instance
      */
     @JvmStatic
-    fun getReciterPreferencesRepository(): ReciterPreferencesRepository {
-        return DefaultReciterPreferencesRepository.getInstance()
-    }
+    fun getReciterPreferencesRepository(): ReciterPreferencesRepository = get()
 
     /**
      * Get ThemeRepository for managing theme preferences
      * @return ThemeRepository singleton instance
      */
     @JvmStatic
-    fun getThemeRepository(): ThemeRepository {
-        return DefaultThemeRepository.getInstance()
-    }
+    fun getThemeRepository(): ThemeRepository = get()
 
     /**
      * Get DataExportRepository for exporting user data
      * @return DataExportRepository singleton instance
      */
     @JvmStatic
-    fun getDataExportRepository(): DataExportRepository {
-        return DefaultDataExportRepository.getInstance()
-    }
+    fun getDataExportRepository(): DataExportRepository = get()
 }

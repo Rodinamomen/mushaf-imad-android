@@ -4,27 +4,16 @@ import com.mushafimad.core.data.cache.QuranDataCacheService
 import com.mushafimad.core.domain.models.MushafType
 import com.mushafimad.core.domain.models.Verse
 import com.mushafimad.core.domain.repository.VerseRepository
-import com.mushafimad.core.internal.ServiceRegistry
 
 /**
  * Default implementation of VerseRepository
  * Internal API - not exposed to library consumers
  */
-internal class DefaultVerseRepository private constructor(
+internal class DefaultVerseRepository (
     private val realmService: RealmService,
     private val cacheService: QuranDataCacheService
 ) : VerseRepository {
 
-    companion object {
-        @Volatile private var instance: DefaultVerseRepository? = null
-
-        fun getInstance(): VerseRepository = instance ?: synchronized(this) {
-            instance ?: DefaultVerseRepository(
-                ServiceRegistry.getRealmService(),
-                ServiceRegistry.getQuranCacheService()
-            ).also { instance = it }
-        }
-    }
 
     override suspend fun getVersesForPage(pageNumber: Int, mushafType: MushafType): List<Verse> {
         // Try cache first

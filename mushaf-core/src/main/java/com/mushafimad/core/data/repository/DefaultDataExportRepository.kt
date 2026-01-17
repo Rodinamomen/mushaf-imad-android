@@ -12,7 +12,7 @@ import kotlinx.serialization.json.Json
  * Default implementation of DataExportRepository
  * Internal implementation - not exposed in public API
  */
-internal class DefaultDataExportRepository private constructor(
+internal class DefaultDataExportRepository (
     private val bookmarkRepository: BookmarkRepository,
     private val readingHistoryRepository: ReadingHistoryRepository,
     private val searchHistoryRepository: SearchHistoryRepository,
@@ -21,20 +21,6 @@ internal class DefaultDataExportRepository private constructor(
     private val themeRepository: ThemeRepository
 ) : DataExportRepository {
 
-    companion object {
-        @Volatile private var instance: DefaultDataExportRepository? = null
-
-        fun getInstance(): DataExportRepository = instance ?: synchronized(this) {
-            instance ?: DefaultDataExportRepository(
-                DefaultBookmarkRepository.getInstance(),
-                DefaultReadingHistoryRepository.getInstance(),
-                DefaultSearchHistoryRepository.getInstance(),
-                DefaultPreferencesRepository.getInstance(),
-                DefaultReciterPreferencesRepository.getInstance(),
-                DefaultThemeRepository.getInstance()
-            ).also { instance = it }
-        }
-    }
 
     private val json = Json {
         prettyPrint = true

@@ -3,7 +3,6 @@ package com.mushafimad.core.data.repository
 import com.mushafimad.core.data.local.entities.BookmarkEntity
 import com.mushafimad.core.domain.models.Bookmark
 import com.mushafimad.core.domain.repository.BookmarkRepository
-import com.mushafimad.core.internal.ServiceRegistry
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
 import kotlinx.coroutines.Dispatchers
@@ -16,19 +15,9 @@ import org.mongodb.kbson.ObjectId
  * Default implementation of BookmarkRepository using Realm
  * Internal implementation - not exposed in public API
  */
-internal class DefaultBookmarkRepository private constructor(
+internal class DefaultBookmarkRepository(
     private val realmService: RealmService
 ) : BookmarkRepository {
-
-    companion object {
-        @Volatile private var instance: DefaultBookmarkRepository? = null
-
-        fun getInstance(): BookmarkRepository = instance ?: synchronized(this) {
-            instance ?: DefaultBookmarkRepository(
-                ServiceRegistry.getRealmService()
-            ).also { instance = it }
-        }
-    }
 
     private val realm: Realm
         get() = realmService.getRealm()

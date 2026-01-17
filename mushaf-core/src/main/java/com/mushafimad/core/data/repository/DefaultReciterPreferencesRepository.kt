@@ -7,7 +7,6 @@ import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.mushafimad.core.domain.repository.ReciterPreferencesRepository
-import com.mushafimad.core.internal.ServiceRegistry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -18,25 +17,18 @@ private val Context.reciterDataStore by preferencesDataStore(name = "reciter_pre
  * Implementation of ReciterPreferencesRepository using DataStore
  * Internal implementation - not exposed in public API
  */
-internal class DefaultReciterPreferencesRepository private constructor(
+internal class DefaultReciterPreferencesRepository (
     private val context: Context
 ) : ReciterPreferencesRepository {
 
     private val dataStore = context.reciterDataStore
 
     companion object {
-        @Volatile private var instance: DefaultReciterPreferencesRepository? = null
-
-        fun getInstance(): ReciterPreferencesRepository = instance ?: synchronized(this) {
-            instance ?: DefaultReciterPreferencesRepository(
-                ServiceRegistry.getContext()
-            ).also { instance = it }
-        }
         private val SELECTED_RECITER_ID_KEY = intPreferencesKey("selected_reciter_id")
         private val PLAYBACK_SPEED_KEY = floatPreferencesKey("playback_speed")
         private val REPEAT_MODE_KEY = booleanPreferencesKey("repeat_mode")
 
-        private const val DEFAULT_RECITER_ID = 1 // Abdul Basit Abdul Samad
+        private const val DEFAULT_RECITER_ID = 1
         private const val DEFAULT_PLAYBACK_SPEED = 1.0f
         private const val DEFAULT_REPEAT_MODE = false
     }

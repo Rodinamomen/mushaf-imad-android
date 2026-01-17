@@ -7,7 +7,6 @@ import com.mushafimad.core.domain.models.SearchType
 import com.mushafimad.core.domain.repository.SearchHistoryRepository
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
-import com.mushafimad.core.internal.ServiceRegistry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -18,19 +17,10 @@ import org.mongodb.kbson.ObjectId
  * Default implementation of SearchHistoryRepository using Realm
  * Internal implementation - not exposed in public API
  */
-internal class DefaultSearchHistoryRepository private constructor(
+internal class DefaultSearchHistoryRepository (
     private val realmService: RealmService
 ) : SearchHistoryRepository {
 
-    companion object {
-        @Volatile private var instance: DefaultSearchHistoryRepository? = null
-
-        fun getInstance(): SearchHistoryRepository = instance ?: synchronized(this) {
-            instance ?: DefaultSearchHistoryRepository(
-                ServiceRegistry.getRealmService()
-            ).also { instance = it }
-        }
-    }
 
     private val realm: Realm
         get() = realmService.getRealm()

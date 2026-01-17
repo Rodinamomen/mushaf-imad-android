@@ -8,30 +8,18 @@ import com.mushafimad.core.data.audio.ReciterService
 import com.mushafimad.core.domain.models.AyahTiming
 import com.mushafimad.core.domain.models.ReciterInfo
 import com.mushafimad.core.domain.repository.AudioRepository
-import com.mushafimad.core.internal.ServiceRegistry
 import kotlinx.coroutines.flow.Flow
 
 /**
  * Default implementation of AudioRepository
  * Internal implementation - not exposed in public API
  */
-internal class DefaultAudioRepository private constructor(
+internal class DefaultAudioRepository (
     private val mediaSessionManager: MediaSessionManager,
     private val ayahTimingService: AyahTimingService,
     private val reciterService: ReciterService
 ) : AudioRepository {
 
-    companion object {
-        @Volatile private var instance: DefaultAudioRepository? = null
-
-        fun getInstance(): AudioRepository = instance ?: synchronized(this) {
-            instance ?: DefaultAudioRepository(
-                ServiceRegistry.getMediaSessionManager(),
-                ServiceRegistry.getAyahTimingService(),
-                ServiceRegistry.getReciterService()
-            ).also { instance = it }
-        }
-    }
 
     init {
         // Initialize MediaSessionManager

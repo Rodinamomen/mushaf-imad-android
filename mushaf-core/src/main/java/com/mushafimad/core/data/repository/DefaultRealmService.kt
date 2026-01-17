@@ -30,7 +30,7 @@ internal class DefaultRealmService(
 
     companion object {
         private const val REALM_FILE_NAME = "quran.realm"
-        private const val SCHEMA_VERSION = 24L  // Match bundled file schema version
+        private const val SCHEMA_VERSION = 24L
     }
 
     init {
