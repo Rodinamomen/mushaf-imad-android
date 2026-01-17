@@ -5,6 +5,8 @@ import com.mushafimad.core.MushafLibrary
 import com.mushafimad.core.domain.models.AyahTiming
 import com.mushafimad.core.domain.models.ReciterTiming
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -33,20 +35,21 @@ class AyahTimingService @Inject constructor(
     /**
      * Load timing data for a specific reciter
      * Returns null if reciter timing file doesn't exist
+     * Runs on background thread
      */
-    fun loadTimingForReciter(reciterId: Int): ReciterTiming? {
+    suspend fun loadTimingForReciter(reciterId: Int): ReciterTiming? = withContext(Dispatchers.IO) {
         // Return cached data if available
         if (timingCache.containsKey(reciterId)) {
-            return timingCache[reciterId]
+            return@withContext timingCache[reciterId]
         }
 
         // Check if this reciter has timing data
         if (!availableReciterIds.contains(reciterId)) {
             MushafLibrary.logger.warning("No timing data available for reciter $reciterId")
-            return null
+            return@withContext null
         }
 
-        return try {
+        try {
             val fileName = "ayah_timing/read_$reciterId.json"
             val jsonString = context.assets.open(fileName).bufferedReader().use { it.readText() }
             val timing = json.decodeFromString<ReciterTiming>(jsonString)
@@ -69,7 +72,7 @@ class AyahTimingService @Inject constructor(
      * @param ayahNumber The ayah number within the chapter
      * @return AyahTiming if found, null otherwise
      */
-    fun getTiming(reciterId: Int, chapterId: Int, ayahNumber: Int): AyahTiming? {
+    suspend fun getTiming(reciterId: Int, chapterId: Int, ayahNumber: Int): AyahTiming? {
         val timing = loadTimingForReciter(reciterId) ?: return null
 
         val chapter = timing.chapters.find { it.id == chapterId } ?: return null
@@ -85,7 +88,7 @@ class AyahTimingService @Inject constructor(
      * @param currentTimeMs Current playback position in milliseconds
      * @return The ayah number at the current time, or null if not found
      */
-    fun getCurrentVerse(reciterId: Int, chapterId: Int, currentTimeMs: Int): Int? {
+    suspend fun getCurrentVerse(reciterId: Int, chapterId: Int, currentTimeMs: Int): Int? {
         val timing = loadTimingForReciter(reciterId) ?: return null
 
         val chapter = timing.chapters.find { it.id == chapterId } ?: return null
@@ -105,7 +108,7 @@ class AyahTimingService @Inject constructor(
      * @param chapterId The chapter (surah) number (1-114)
      * @return List of AyahTiming for all verses in the chapter
      */
-    fun getChapterTimings(reciterId: Int, chapterId: Int): List<AyahTiming> {
+    suspend fun getChapterTimings(reciterId: Int, chapterId: Int): List<AyahTiming> {
         val timing = loadTimingForReciter(reciterId) ?: return emptyList()
         return timing.chapters.find { it.id == chapterId }?.ayaTiming ?: emptyList()
     }

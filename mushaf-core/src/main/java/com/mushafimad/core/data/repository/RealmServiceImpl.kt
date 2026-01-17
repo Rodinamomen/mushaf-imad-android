@@ -6,7 +6,12 @@ import com.mushafimad.core.domain.models.*
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.ext.query
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
@@ -23,6 +28,8 @@ internal class RealmServiceImpl @Inject constructor(
 
     private var realm: Realm? = null
     private var configuration: RealmConfiguration? = null
+    private val initMutex = Mutex()
+    private val initScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     companion object {
         private const val REALM_FILE_NAME = "quran.realm"
@@ -30,16 +37,31 @@ internal class RealmServiceImpl @Inject constructor(
     }
 
     init {
-        // Initialize Realm synchronously on construction
-        // This ensures Realm is ready when repositories use this service
-        initializeRealm()
+        // Eagerly start initialization on background thread
+        // This ensures Realm is ready by the time UI needs it
+        initScope.launch {
+            ensureInitialized()
+        }
     }
 
     override val isInitialized: Boolean
         get() = realm != null
 
     /**
-     * Synchronous initialization called from init block
+     * Internal initialization - runs on background thread
+     * Thread-safe lazy initialization with mutex
+     */
+    private suspend fun ensureInitialized() = initMutex.withLock {
+        // Skip if already initialized
+        if (realm != null) return@withLock
+
+        withContext(Dispatchers.IO) {
+            initializeRealm()
+        }
+    }
+
+    /**
+     * Initialize Realm - must be called on background thread
      */
     private fun initializeRealm() {
         // Skip if already initialized
@@ -127,8 +149,8 @@ internal class RealmServiceImpl @Inject constructor(
     /**
      * Public suspend initialize for manual initialization if needed
      */
-    override suspend fun initialize() = withContext(Dispatchers.IO) {
-        initializeRealm()
+    override suspend fun initialize() {
+        ensureInitialized()
     }
 
     override fun getRealm(): Realm {
@@ -138,6 +160,7 @@ internal class RealmServiceImpl @Inject constructor(
     // MARK: - Chapter Operations
 
     override suspend fun fetchAllChaptersAsync(): List<Chapter> = withContext(Dispatchers.IO) {
+        ensureInitialized()
         val realmInstance = realm ?: throw IllegalStateException("Realm not initialized")
         realmInstance.query<ChapterEntity>()
             .sort("number")
@@ -146,6 +169,7 @@ internal class RealmServiceImpl @Inject constructor(
     }
 
     override suspend fun getChapter(number: Int): Chapter? = withContext(Dispatchers.IO) {
+        ensureInitialized()
         val realmInstance = realm ?: return@withContext null
         realmInstance.query<ChapterEntity>("number == $0", number)
             .first()
@@ -194,6 +218,7 @@ internal class RealmServiceImpl @Inject constructor(
     override suspend fun fetchPageAsync(number: Int): Page? = getPage(number)
 
     override suspend fun getTotalPages(): Int = withContext(Dispatchers.IO) {
+        ensureInitialized()
         val realmInstance = realm ?: return@withContext 604
         realmInstance.query<PageEntity>().count().find().toInt()
     }
@@ -238,6 +263,7 @@ internal class RealmServiceImpl @Inject constructor(
 
     override suspend fun getVersesForPage(pageNumber: Int, mushafType: MushafType): List<Verse> =
         withContext(Dispatchers.IO) {
+            ensureInitialized()
             println("RealmService: getVersesForPage($pageNumber, $mushafType)")
             val page = getPageEntity(pageNumber)
 
@@ -265,6 +291,7 @@ internal class RealmServiceImpl @Inject constructor(
         }
 
     override suspend fun getVersesForChapter(chapterNumber: Int): List<Verse> = withContext(Dispatchers.IO) {
+        ensureInitialized()
         val realmInstance = realm ?: return@withContext emptyList()
         val chapter = realmInstance.query<ChapterEntity>("number == $0", chapterNumber)
             .first()
@@ -274,6 +301,7 @@ internal class RealmServiceImpl @Inject constructor(
     }
 
     override suspend fun getVerse(chapterNumber: Int, verseNumber: Int): Verse? = withContext(Dispatchers.IO) {
+        ensureInitialized()
         val realmInstance = realm ?: return@withContext null
         val humanReadableID = "${chapterNumber}_${verseNumber}"
 
@@ -284,6 +312,7 @@ internal class RealmServiceImpl @Inject constructor(
     }
 
     override suspend fun getSajdaVerses(): List<Verse> = withContext(Dispatchers.IO) {
+        ensureInitialized()
         val realmInstance = realm ?: return@withContext emptyList()
 
         // Known sajda verse IDs
@@ -304,6 +333,7 @@ internal class RealmServiceImpl @Inject constructor(
     // MARK: - Part (Juz) Operations
 
     override suspend fun getPart(number: Int): Part? = withContext(Dispatchers.IO) {
+        ensureInitialized()
         val realmInstance = realm ?: return@withContext null
         realmInstance.query<PartEntity>("number == $0", number)
             .first()
@@ -339,6 +369,7 @@ internal class RealmServiceImpl @Inject constructor(
     // MARK: - Quarter (Hizb) Operations
 
     override suspend fun getQuarter(hizbNumber: Int, fraction: Int): Quarter? = withContext(Dispatchers.IO) {
+        ensureInitialized()
         val realmInstance = realm ?: return@withContext null
         realmInstance.query<QuarterEntity>("hizbNumber == $0 AND hizbFraction == $1", hizbNumber, fraction)
             .first()
@@ -353,6 +384,7 @@ internal class RealmServiceImpl @Inject constructor(
 
     override suspend fun getQuarterForVerse(chapterNumber: Int, verseNumber: Int): Quarter? =
         withContext(Dispatchers.IO) {
+            ensureInitialized()
             val realmInstance = realm ?: return@withContext null
 
             realmInstance.query<VerseEntity>("humanReadableID == $0", "${chapterNumber}_${verseNumber}")
@@ -373,6 +405,7 @@ internal class RealmServiceImpl @Inject constructor(
     // MARK: - Search Operations
 
     override suspend fun searchVerses(query: String): List<Verse> = withContext(Dispatchers.IO) {
+        ensureInitialized()
         val realmInstance = realm ?: return@withContext emptyList()
         realmInstance.query<VerseEntity>("searchableText CONTAINS[c] $0", query)
             .find()
@@ -380,6 +413,7 @@ internal class RealmServiceImpl @Inject constructor(
     }
 
     override suspend fun searchChapters(query: String): List<Chapter> = withContext(Dispatchers.IO) {
+        ensureInitialized()
         val realmInstance = realm ?: return@withContext emptyList()
         realmInstance.query<ChapterEntity>(
             "searchableText CONTAINS[c] $0 OR searchableKeywords CONTAINS[c] $0",

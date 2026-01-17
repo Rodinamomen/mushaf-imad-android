@@ -11,6 +11,7 @@ class SampleApplication : Application() {
         super.onCreate()
 
         // Initialize Mushaf library
+        // This handles all internal initialization including Realm
         MushafLibrary.initialize(
             context = this
             // logger = FirebaseMushafLogger() // Optional: custom logger

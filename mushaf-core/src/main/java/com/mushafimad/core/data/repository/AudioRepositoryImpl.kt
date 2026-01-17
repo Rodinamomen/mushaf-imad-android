@@ -4,6 +4,7 @@ import com.mushafimad.core.data.audio.AudioPlayerState
 import com.mushafimad.core.data.audio.AyahTimingService
 import com.mushafimad.core.data.audio.MediaSessionManager
 import com.mushafimad.core.data.audio.ReciterDataProvider
+import com.mushafimad.core.data.audio.ReciterService
 import com.mushafimad.core.domain.models.AyahTiming
 import com.mushafimad.core.domain.models.ReciterInfo
 import com.mushafimad.core.domain.repository.AudioRepository
@@ -18,7 +19,8 @@ import javax.inject.Singleton
 @Singleton
 internal class AudioRepositoryImpl @Inject constructor(
     private val mediaSessionManager: MediaSessionManager,
-    private val ayahTimingService: AyahTimingService
+    private val ayahTimingService: AyahTimingService,
+    private val reciterService: ReciterService
 ) : AudioRepository {
 
     init {
@@ -28,23 +30,25 @@ internal class AudioRepositoryImpl @Inject constructor(
 
     // Reciter operations
     override fun getAllReciters(): List<ReciterInfo> {
-        return ReciterDataProvider.allReciters
+        return reciterService.availableReciters.value
     }
 
     override fun getReciterById(reciterId: Int): ReciterInfo? {
-        return ReciterDataProvider.getReciterById(reciterId)
+        return reciterService.getReciterById(reciterId)
     }
 
     override fun searchReciters(query: String, languageCode: String): List<ReciterInfo> {
-        return ReciterDataProvider.searchReciters(query, languageCode)
+        return reciterService.searchReciters(query, languageCode)
     }
 
     override fun getHafsReciters(): List<ReciterInfo> {
-        return ReciterDataProvider.getHafsReciters()
+        return reciterService.getHafsReciters()
     }
 
     override fun getDefaultReciter(): ReciterInfo {
-        return ReciterDataProvider.getDefaultReciter()
+        return reciterService.selectedReciter.value
+            ?: reciterService.availableReciters.value.firstOrNull()
+            ?: ReciterDataProvider.getDefaultReciter()
     }
 
     // Playback control
@@ -101,15 +105,15 @@ internal class AudioRepositoryImpl @Inject constructor(
     }
 
     // Timing operations
-    override fun getAyahTiming(reciterId: Int, chapterNumber: Int, ayahNumber: Int): AyahTiming? {
+    override suspend fun getAyahTiming(reciterId: Int, chapterNumber: Int, ayahNumber: Int): AyahTiming? {
         return ayahTimingService.getTiming(reciterId, chapterNumber, ayahNumber)
     }
 
-    override fun getCurrentVerse(reciterId: Int, chapterNumber: Int, currentTimeMs: Int): Int? {
+    override suspend fun getCurrentVerse(reciterId: Int, chapterNumber: Int, currentTimeMs: Int): Int? {
         return ayahTimingService.getCurrentVerse(reciterId, chapterNumber, currentTimeMs)
     }
 
-    override fun getChapterTimings(reciterId: Int, chapterNumber: Int): List<AyahTiming> {
+    override suspend fun getChapterTimings(reciterId: Int, chapterNumber: Int): List<AyahTiming> {
         return ayahTimingService.getChapterTimings(reciterId, chapterNumber)
     }
 

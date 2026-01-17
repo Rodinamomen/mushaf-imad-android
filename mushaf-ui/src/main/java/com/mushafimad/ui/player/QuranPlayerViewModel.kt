@@ -190,7 +190,9 @@ internal class QuranPlayerViewModel @Inject constructor(
      */
     fun seekTo(positionMs: Long) {
         mediaSessionManager.seekTo(positionMs)
-        updateCurrentVerse()
+        viewModelScope.launch {
+            updateCurrentVerse()
+        }
     }
 
     /**
@@ -198,36 +200,35 @@ internal class QuranPlayerViewModel @Inject constructor(
      * @param verseNumber Verse number within the current chapter
      * @return true if seek was successful, false if verse timing not found
      */
-    fun seekToVerse(verseNumber: Int): Boolean {
-        val timing = ayahTimingService.getTiming(currentReciterId, chapterNumber, verseNumber)
-        if (timing == null) {
-            MushafLibrary.logger.warning("No timing found for verse $verseNumber in chapter $chapterNumber")
-            return false
-        }
+    fun seekToVerse(verseNumber: Int) {
+        viewModelScope.launch {
+            val timing = ayahTimingService.getTiming(currentReciterId, chapterNumber, verseNumber)
+            if (timing == null) {
+                MushafLibrary.logger.warning("No timing found for verse $verseNumber in chapter $chapterNumber")
+                return@launch
+            }
 
-        mediaSessionManager.seekTo(timing.startTime.toLong())
-        _currentVerseNumber.value = verseNumber
-        MushafLibrary.logger.info("Seeked to verse $verseNumber at ${timing.startTime}ms")
-        return true
+            mediaSessionManager.seekTo(timing.startTime.toLong())
+            _currentVerseNumber.value = verseNumber
+            MushafLibrary.logger.info("Seeked to verse $verseNumber at ${timing.startTime}ms")
+        }
     }
 
     /**
      * Seek to next verse if available
-     * @return true if successful, false if no next verse
      */
-    fun seekToNextVerse(): Boolean {
-        val currentVerse = _currentVerseNumber.value ?: return false
-        return seekToVerse(currentVerse + 1)
+    fun seekToNextVerse() {
+        val currentVerse = _currentVerseNumber.value ?: return
+        seekToVerse(currentVerse + 1)
     }
 
     /**
      * Seek to previous verse if available
-     * @return true if successful, false if no previous verse
      */
-    fun seekToPreviousVerse(): Boolean {
-        val currentVerse = _currentVerseNumber.value ?: return false
-        if (currentVerse <= 1) return false
-        return seekToVerse(currentVerse - 1)
+    fun seekToPreviousVerse() {
+        val currentVerse = _currentVerseNumber.value ?: return
+        if (currentVerse <= 1) return
+        seekToVerse(currentVerse - 1)
     }
 
     /**
@@ -297,7 +298,7 @@ internal class QuranPlayerViewModel @Inject constructor(
     /**
      * Update current verse based on playback position
      */
-    private fun updateCurrentVerse() {
+    private suspend fun updateCurrentVerse() {
         if (chapterNumber <= 0 || currentReciterId <= 0) return
 
         val currentTimeMs = _currentTimeMs.value.toInt()

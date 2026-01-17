@@ -1,10 +1,15 @@
 package com.mushafimad.core
 
 import android.content.Context
+import com.mushafimad.core.internal.LibraryInitializer
 import com.mushafimad.core.logging.MushafAnalytics
 import com.mushafimad.core.logging.MushafLogger
 import com.mushafimad.core.logging.DefaultMushafLogger
 import com.mushafimad.core.logging.NoOpMushafAnalytics
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 
 /**
  * Main entry point for MushafImad library
@@ -35,6 +40,15 @@ object MushafLibrary {
         private set
 
     /**
+     * Internal entry point for accessing library dependencies
+     */
+    @EntryPoint
+    @InstallIn(SingletonComponent::class)
+    internal interface LibraryEntryPoint {
+        fun libraryInitializer(): LibraryInitializer
+    }
+
+    /**
      * Initialize the Mushaf library
      *
      * @param context Application context
@@ -56,8 +70,12 @@ object MushafLibrary {
         this.logger = logger
         this.analytics = analytics
 
-        // Initialize other components here
-        // e.g., FontManager, RealmService, etc.
+        // Initialize critical services (Realm, etc.) using Hilt
+        val entryPoint = EntryPointAccessors.fromApplication(
+            applicationContext!!,
+            LibraryEntryPoint::class.java
+        )
+        entryPoint.libraryInitializer().initialize()
 
         isInitialized = true
         this.logger.info("MushafLibrary initialized successfully")

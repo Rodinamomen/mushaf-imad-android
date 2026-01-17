@@ -15,6 +15,7 @@ import androidx.media3.session.CommandButton
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import androidx.media3.session.SessionCommand
+import androidx.media3.session.SessionError
 import androidx.media3.session.SessionResult
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.Futures
@@ -57,6 +58,9 @@ class AudioPlaybackService : MediaSessionService() {
 
     @Inject
     lateinit var chapterRepository: ChapterRepository
+
+    @Inject
+    lateinit var reciterService: ReciterService
 
     private var mediaSession: MediaSession? = null
     private lateinit var player: ExoPlayer
@@ -178,7 +182,7 @@ class AudioPlaybackService : MediaSessionService() {
                         loadChapter(chapterNumber, reciterId)
                         Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
                     } else {
-                        Futures.immediateFuture(SessionResult(SessionResult.RESULT_ERROR_BAD_VALUE))
+                        Futures.immediateFuture(SessionResult(SessionError.ERROR_BAD_VALUE))
                     }
                 }
 
@@ -189,7 +193,7 @@ class AudioPlaybackService : MediaSessionService() {
                         loadChapter(currentChapter!!, reciterId)
                         Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
                     } else {
-                        Futures.immediateFuture(SessionResult(SessionResult.RESULT_ERROR_BAD_VALUE))
+                        Futures.immediateFuture(SessionResult(SessionError.ERROR_BAD_VALUE))
                     }
                 }
 
@@ -220,13 +224,14 @@ class AudioPlaybackService : MediaSessionService() {
     private fun loadChapter(chapterNumber: Int, reciterId: Int) {
         serviceScope.launch {
             try {
-                val reciter = ReciterDataProvider.getReciterById(reciterId)
+                val reciter = reciterService.getReciterById(reciterId)
                 if (reciter == null) {
                     MushafLibrary.logger.error("Reciter not found: $reciterId")
                     return@launch
                 }
 
                 val audioUrl = reciter.getAudioUrl(chapterNumber)
+                MushafLibrary.logger.info("Configured player for chapter $chapterNumber with reciter $reciterId")
                 MushafLibrary.logger.info("Loading audio: $audioUrl")
 
                 currentChapter = chapterNumber

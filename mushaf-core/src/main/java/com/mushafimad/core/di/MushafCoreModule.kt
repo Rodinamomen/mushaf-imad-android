@@ -11,6 +11,7 @@ import com.mushafimad.core.domain.repository.QuranRepository
 import com.mushafimad.core.domain.repository.ReadingHistoryRepository
 import com.mushafimad.core.domain.repository.SearchHistoryRepository
 import com.mushafimad.core.domain.repository.VerseRepository
+import com.mushafimad.core.internal.LibraryInitializer
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

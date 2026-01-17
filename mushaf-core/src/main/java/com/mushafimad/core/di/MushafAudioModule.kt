@@ -2,6 +2,7 @@ package com.mushafimad.core.di
 
 import com.mushafimad.core.data.audio.AyahTimingService
 import com.mushafimad.core.data.audio.MediaSessionManager
+import com.mushafimad.core.data.audio.ReciterService
 import com.mushafimad.core.data.repository.AudioRepositoryImpl
 import com.mushafimad.core.domain.repository.AudioRepository
 import dagger.Module
@@ -25,6 +26,7 @@ object MushafAudioModule {
     @Singleton
     internal fun provideAudioRepository(
         mediaSessionManager: MediaSessionManager,
-        ayahTimingService: AyahTimingService
-    ): AudioRepository = AudioRepositoryImpl(mediaSessionManager, ayahTimingService)
+        ayahTimingService: AyahTimingService,
+        reciterService: ReciterService
+    ): AudioRepository = AudioRepositoryImpl(mediaSessionManager, ayahTimingService, reciterService)
 }

@@ -67,12 +67,14 @@ class AudioViewModel @Inject constructor(
         val chapterNumber = playerState.currentChapter ?: return
 
         if (playerState.playbackState == PlaybackState.PLAYING) {
-            val currentVerse = audioRepository.getCurrentVerse(
-                reciterId = reciterId,
-                chapterNumber = chapterNumber,
-                currentTimeMs = playerState.currentPositionMs.toInt()
-            )
-            _uiState.value = _uiState.value.copy(currentVerse = currentVerse)
+            viewModelScope.launch {
+                val currentVerse = audioRepository.getCurrentVerse(
+                    reciterId = reciterId,
+                    chapterNumber = chapterNumber,
+                    currentTimeMs = playerState.currentPositionMs.toInt()
+                )
+                _uiState.value = _uiState.value.copy(currentVerse = currentVerse)
+            }
         }
     }
 
@@ -94,16 +96,18 @@ class AudioViewModel @Inject constructor(
      * Load and play a chapter
      */
     fun loadChapter(chapterNumber: Int, autoPlay: Boolean = true) {
-        val reciter = _uiState.value.selectedReciter ?: audioRepository.getDefaultReciter()
+        viewModelScope.launch {
+            val reciter = _uiState.value.selectedReciter ?: audioRepository.getDefaultReciter()
 
-        // Load chapter timings if available
-        if (audioRepository.hasTimingForReciter(reciter.id)) {
-            val timings = audioRepository.getChapterTimings(reciter.id, chapterNumber)
-            _uiState.value = _uiState.value.copy(chapterTimings = timings)
+            // Load chapter timings if available
+            if (audioRepository.hasTimingForReciter(reciter.id)) {
+                val timings = audioRepository.getChapterTimings(reciter.id, chapterNumber)
+                _uiState.value = _uiState.value.copy(chapterTimings = timings)
+            }
+
+            // Load and play audio
+            audioRepository.loadChapter(chapterNumber, reciter.id, autoPlay)
         }
-
-        // Load and play audio
-        audioRepository.loadChapter(chapterNumber, reciter.id, autoPlay)
     }
 
     /**
@@ -153,12 +157,14 @@ class AudioViewModel @Inject constructor(
      * Seek to specific verse
      */
     fun seekToVerse(verseNumber: Int) {
-        val reciter = _uiState.value.selectedReciter ?: return
-        val chapterNumber = _uiState.value.playerState.currentChapter ?: return
+        viewModelScope.launch {
+            val reciter = _uiState.value.selectedReciter ?: return@launch
+            val chapterNumber = _uiState.value.playerState.currentChapter ?: return@launch
 
-        val timing = audioRepository.getAyahTiming(reciter.id, chapterNumber, verseNumber)
-        timing?.let {
-            audioRepository.seekTo(it.startTime.toLong())
+            val timing = audioRepository.getAyahTiming(reciter.id, chapterNumber, verseNumber)
+            timing?.let {
+                audioRepository.seekTo(it.startTime.toLong())
+            }
         }
     }
 

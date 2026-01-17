@@ -5,9 +5,13 @@ import android.content.SharedPreferences
 import com.mushafimad.core.MushafLibrary
 import com.mushafimad.core.domain.models.ReciterInfo
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -36,15 +40,22 @@ class ReciterService @Inject constructor(
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
+    // Service scope for background initialization
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     init {
-        loadAvailableReciters()
+        // Load reciters asynchronously on background thread
+        serviceScope.launch {
+            loadAvailableReciters()
+        }
     }
 
     /**
      * Load available reciters from timing JSON files
      * Falls back to ReciterDataProvider if JSON loading fails
+     * Runs on background thread
      */
-    private fun loadAvailableReciters() {
+    private suspend fun loadAvailableReciters() {
         try {
             val reciters = mutableListOf<ReciterInfo>()
 

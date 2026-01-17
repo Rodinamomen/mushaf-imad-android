@@ -114,7 +114,7 @@ interface AudioRepository {
      * @param ayahNumber The ayah number within the chapter
      * @return AyahTiming if found, null otherwise
      */
-    fun getAyahTiming(reciterId: Int, chapterNumber: Int, ayahNumber: Int): AyahTiming?
+    suspend fun getAyahTiming(reciterId: Int, chapterNumber: Int, ayahNumber: Int): AyahTiming?
 
     /**
      * Get the current verse being recited based on playback position
@@ -123,7 +123,7 @@ interface AudioRepository {
      * @param currentTimeMs Current playback position in milliseconds
      * @return The ayah number at the current time, or null if not found
      */
-    fun getCurrentVerse(reciterId: Int, chapterNumber: Int, currentTimeMs: Int): Int?
+    suspend fun getCurrentVerse(reciterId: Int, chapterNumber: Int, currentTimeMs: Int): Int?
 
     /**
      * Get all timing data for a chapter
@@ -131,7 +131,7 @@ interface AudioRepository {
      * @param chapterNumber The chapter (surah) number (1-114)
      * @return List of AyahTiming for all verses in the chapter
      */
-    fun getChapterTimings(reciterId: Int, chapterNumber: Int): List<AyahTiming>
+    suspend fun getChapterTimings(reciterId: Int, chapterNumber: Int): List<AyahTiming>
 
     /**
      * Check if timing data is available for a reciter
