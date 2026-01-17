@@ -1,22 +1,26 @@
 package com.mushafimad.ui.mushaf
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mushafimad.core.R
+import com.mushafimad.ui.R
 import com.mushafimad.ui.theme.QuranFonts
 import com.mushafimad.ui.theme.readingTheme
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.ui.text.font.FontWeight
 
 /**
  * VerseFasel - Decorative verse number marker
@@ -28,46 +32,50 @@ import androidx.compose.ui.text.font.FontWeight
 fun VerseFasel(
     number: Int,
     scale: Float = 1.0f,
+    sizeInPx: Float? = null,  // quran_android approach: pass size directly
     modifier: Modifier = Modifier
 ) {
-    val readingTheme = MaterialTheme.readingTheme
+    val density = LocalDensity.current
 
-    // iOS dimensions (balance = 3.69) - using moderate scale for visibility
-    val balance = 1.2f  // Balanced size - visible but not blocking
-    val baseWidth = 21 * balance      // ~25dp
-    val baseHeight = 27 * balance     // ~32dp
-    val baseFontSize = 14 * balance   // ~17sp
+    // Base dimensions (matching quran_android approach)
+    val baseFontSize = 18f
+    val balance = 1.2f
+    val baseWidth = 21 * balance
+
+    // Calculate size: either use provided sizeInPx or fallback to scale-based calculation
+    val finalSize = sizeInPx?.let { px ->
+        with(density) { px.toDp() }
+    } ?: run {
+        (baseWidth * scale).dp
+    }
+
+    // Calculate effective scale for font sizing
+    val effectiveScale = sizeInPx?.let { px ->
+        with(density) {
+            px.toDp().value / baseWidth
+        }
+    } ?: scale
 
     Box(
-        modifier = modifier
-            .size(
-                width = (baseWidth * scale).dp,
-                height = (baseHeight * scale).dp
-            )
-            .offset(x = (-2).dp, y = (-4).dp),
+        modifier = modifier.size(finalSize),
         contentAlignment = Alignment.Center
     ) {
-        // Decorative fasel background (matching iOS)
-        // TODO: Add fasel drawable resource to res/drawable/
-        /* Image(
+        // Decorative fasel background from iOS assets (uses original colors from SVG)
+        Image(
             painter = painterResource(id = R.drawable.fasel),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Fit,
-            colorFilter = ColorFilter.tint(readingTheme.textColor)
-        ) */
+            contentScale = ContentScale.Fit
+        )
 
-        // Arabic numeral overlay
+        // Arabic numeral overlay (no offset - centered in Box)
         Text(
             text = convertToArabicNumerals(number),
-            fontSize = (baseFontSize * scale * 0.8f).sp,
+            fontSize = (baseFontSize * effectiveScale * 0.8f).sp,
             fontFamily = QuranFonts.UthmanTaha,
             fontWeight = FontWeight.Bold,
-            color = readingTheme.backgroundColor,  // Inverted for better visibility
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .padding(horizontal = (2 * scale).dp)
-                .offset(x = (-1 * scale).dp, y = (1 * scale).dp)
+            color = Color.Black,
+            textAlign = TextAlign.Center
         )
     }
 }
@@ -90,4 +98,59 @@ private fun convertToArabicNumerals(number: Int): String {
     )
 
     return number.toString().map { arabicNumerals[it] ?: it }.joinToString("")
+}
+
+// Preview Functions
+
+@Preview(name = "VerseFasel - Light Theme", showBackground = true)
+@Composable
+private fun VerseFaselPreview() {
+    MaterialTheme {
+        Row(
+            modifier = Modifier
+                .background(Color(0xFFE4EFD9))
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            VerseFasel(number = 100, scale = 1.0f)
+            VerseFasel(number = 200, scale = 1.0f)
+            VerseFasel(number = 286, scale = 1.0f)
+        }
+    }
+}
+
+@Preview(name = "VerseFasel - Dark Theme", showBackground = true, backgroundColor = 0xFF2F352F)
+@Composable
+private fun VerseFaselDarkPreview() {
+    MaterialTheme {
+        Row(
+            modifier = Modifier
+                .background(Color(0xFF2F352F))
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            VerseFasel(number = 100, scale = 1.0f)
+            VerseFasel(number = 200, scale = 1.0f)
+            VerseFasel(number = 286, scale = 1.0f)
+        }
+    }
+}
+
+@Preview(name = "VerseFasel - Different Scales", showBackground = true)
+@Composable
+private fun VerseFaselScalesPreview() {
+    MaterialTheme {
+        Row(
+            modifier = Modifier
+                .background(Color(0xFFE4EFD9))
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            VerseFasel(number = 123, scale = 0.5f)
+            VerseFasel(number = 123, scale = 1.0f)
+            VerseFasel(number = 123, scale = 1.5f)
+            VerseFasel(number = 123, scale = 2.0f)
+        }
+    }
 }

@@ -63,9 +63,6 @@ fun QuranLineImageView(
         imageBitmap = loadLineImage(context, page, line)
     }
 
-    // Calculate scale based on container width
-    val lineScale = if (containerWidth > 0f) containerWidth / originalWidth else 1f
-
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -144,15 +141,21 @@ fun QuranLineImageView(
                 MushafType.HAFS_1405 -> verse.marker1405
             }
 
-            // Adjust line number: UI uses 1-15, data uses 0-14
+            // Markers use 0-14 indexing like highlights, adjust for UI's 1-15
             if (marker != null && marker.line == (line - 1) && containerWidth > 0f && containerHeight > 0f) {
-                // Calculate marker position (RTL-aware)
+                // Transform percentage coordinates to screen pixels (RTL-aware for X)
                 val markerX = containerWidth * (1.0f - marker.centerX)
                 val markerY = containerHeight * marker.centerY
 
-                // Adjust offset to center the marker better
-                val adjustedX = markerX - (21f * 1.2f * lineScale / 2f)  // Center horizontally
-                val adjustedY = markerY - (27f * 1.2f * lineScale / 2f)  // Center vertically
+                // Match quran_android's marker size calculation exactly
+                // quran_android: markerDimen = (0.025f * 2 * width).toInt()
+                val markerDimen = (0.025f * 2 * containerWidth).toInt()
+
+                // Center the marker at coordinates (quran_android approach)
+                // x = points[0] - (markerDimen / 2) + paddingLeft
+                // Note: we don't have padding in our Compose setup
+                val adjustedX = markerX - (markerDimen / 2f)
+                val adjustedY = markerY - (markerDimen / 2f)
 
                 Box(
                     modifier = Modifier
@@ -163,7 +166,7 @@ fun QuranLineImageView(
                 ) {
                     VerseFasel(
                         number = verse.number,
-                        scale = lineScale
+                        sizeInPx = markerDimen.toFloat()
                     )
                 }
             }
