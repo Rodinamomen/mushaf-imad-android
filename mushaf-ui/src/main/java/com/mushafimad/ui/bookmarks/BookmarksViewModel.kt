@@ -15,9 +15,11 @@ import kotlinx.coroutines.launch
 /**
  * ViewModel for managing bookmarks
  * Provides UI state and operations for bookmark management
+ *
+ * Dependencies are injected via Koin DI
  */
 internal class BookmarksViewModel(
-    private val bookmarkRepository: BookmarkRepository = MushafLibrary.getBookmarkRepository()
+    private val bookmarkRepository: BookmarkRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(BookmarksUiState())

@@ -15,13 +15,15 @@ import kotlinx.coroutines.launch
  * Unified search ViewModel
  * Combines searching across verses, chapters, reciters, and bookmarks
  * Manages search history and suggestions
+ *
+ * Dependencies are injected via Koin DI
  */
 class SearchViewModel(
-    private val verseRepository: VerseRepository = MushafLibrary.getVerseRepository(),
-    private val chapterRepository: ChapterRepository = MushafLibrary.getChapterRepository(),
-    private val audioRepository: AudioRepository = MushafLibrary.getAudioRepository(),
-    private val bookmarkRepository: BookmarkRepository = MushafLibrary.getBookmarkRepository(),
-    private val searchHistoryRepository: SearchHistoryRepository = MushafLibrary.getSearchHistoryRepository()
+    private val verseRepository: VerseRepository,
+    private val chapterRepository: ChapterRepository,
+    private val audioRepository: AudioRepository,
+    private val bookmarkRepository: BookmarkRepository,
+    private val searchHistoryRepository: SearchHistoryRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SearchUiState())

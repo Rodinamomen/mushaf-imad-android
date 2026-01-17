@@ -19,10 +19,12 @@ import kotlinx.coroutines.launch
 /**
  * ViewModel for app settings and data management
  * Handles preferences, data export/import, and backup operations
+ *
+ * Dependencies are injected via Koin DI
  */
 internal class SettingsViewModel(
-    private val preferencesRepository: PreferencesRepository = MushafLibrary.getPreferencesRepository(),
-    private val dataExportRepository: DataExportRepository = MushafLibrary.getDataExportRepository()
+    private val preferencesRepository: PreferencesRepository,
+    private val dataExportRepository: DataExportRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())

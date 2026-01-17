@@ -17,9 +17,11 @@ import kotlinx.coroutines.launch
 /**
  * ViewModel for managing app theme and appearance
  * Provides UI state and operations for theme customization
+ *
+ * Dependencies are injected via Koin DI
  */
 internal class ThemeViewModel(
-    private val themeRepository: ThemeRepository = MushafLibrary.getThemeRepository()
+    private val themeRepository: ThemeRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ThemeUiState())

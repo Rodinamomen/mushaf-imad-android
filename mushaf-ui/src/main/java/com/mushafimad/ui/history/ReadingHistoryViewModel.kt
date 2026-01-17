@@ -17,9 +17,11 @@ import kotlinx.coroutines.launch
 /**
  * ViewModel for reading history and statistics
  * Provides UI state for reading progress, streaks, and statistics
+ *
+ * Dependencies are injected via Koin DI
  */
 internal class ReadingHistoryViewModel(
-    private val readingHistoryRepository: ReadingHistoryRepository = MushafLibrary.getReadingHistoryRepository()
+    private val readingHistoryRepository: ReadingHistoryRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ReadingHistoryUiState())

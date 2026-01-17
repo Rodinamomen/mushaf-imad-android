@@ -5,6 +5,11 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.net.Uri
 import com.mushafimad.core.MushafLibrary
+import com.mushafimad.core.di.coreModule
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.core.context.startKoin
+import org.koin.core.logger.Level
 
 /**
  * ContentProvider that automatically initializes the Mushaf library when the app starts.
@@ -12,6 +17,11 @@ import com.mushafimad.core.MushafLibrary
  * This provider runs before Application.onCreate(), ensuring the library is ready
  * for use immediately. This pattern is used by Firebase, WorkManager, and other
  * modern Android libraries to provide zero-configuration initialization.
+ *
+ * Initialization order:
+ * 1. ServiceRegistry (internal singletons for backend services)
+ * 2. Koin DI (dependency injection for ViewModels and repositories)
+ * 3. MushafLibrary (public API setup)
  *
  * No consumer code is required - the library initializes automatically when the
  * ContentProvider is created by the Android system.
@@ -29,9 +39,16 @@ internal class MushafInitProvider : ContentProvider() {
     override fun onCreate(): Boolean {
         val context = context ?: return false
 
-        // Initialize the library with application context
+        // 1. Initialize ServiceRegistry (backend services)
         // This calls ServiceRegistry.initialize() internally
         MushafLibrary.initializeInternal(context.applicationContext)
+
+        // 2. Initialize Koin DI
+        startKoin {
+            androidLogger(Level.ERROR) // Only log errors
+            androidContext(context.applicationContext)
+            modules(coreModule)
+        }
 
         return true
     }
