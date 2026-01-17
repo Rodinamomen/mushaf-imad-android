@@ -95,7 +95,8 @@ fun QuranLineImageView(
                 MushafType.HAFS_1405 -> verse.highlights1405
             }
 
-            highlights.filter { it.line == line }.forEach { highlight ->
+            // Adjust line number: UI uses 1-15, data uses 0-14
+            highlights.filter { it.line == (line - 1) }.forEach { highlight ->
                 if (containerWidth > 0f && containerHeight > 0f) {
                     // Calculate highlight position (RTL-aware)
                     val visualLeftX = containerWidth * (1.0f - highlight.right)
@@ -143,7 +144,8 @@ fun QuranLineImageView(
                 MushafType.HAFS_1405 -> verse.marker1405
             }
 
-            if (marker != null && marker.line == line && containerWidth > 0f && containerHeight > 0f) {
+            // Adjust line number: UI uses 1-15, data uses 0-14
+            if (marker != null && marker.line == (line - 1) && containerWidth > 0f && containerHeight > 0f) {
                 // Calculate marker position (RTL-aware)
                 val markerX = containerWidth * (1.0f - marker.centerX)
                 val markerY = containerHeight * marker.centerY
