@@ -1,4 +1,4 @@
-package com.mushafimad.library.domain.models
+package com.mushafimad.core.domain.models
 
 /**
  * Lightweight structure describing the contextual header for a Mushaf page

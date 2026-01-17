@@ -2,11 +2,11 @@ package com.mushafimad.sampleapp
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mushafimad.library.data.audio.AudioPlayerState
-import com.mushafimad.library.data.audio.PlaybackState
-import com.mushafimad.library.domain.models.AyahTiming
-import com.mushafimad.library.domain.models.ReciterInfo
-import com.mushafimad.library.domain.repository.AudioRepository
+import com.mushafimad.core.data.audio.AudioPlayerState
+import com.mushafimad.core.data.audio.PlaybackState
+import com.mushafimad.core.domain.models.AyahTiming
+import com.mushafimad.core.domain.models.ReciterInfo
+import com.mushafimad.core.domain.repository.AudioRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

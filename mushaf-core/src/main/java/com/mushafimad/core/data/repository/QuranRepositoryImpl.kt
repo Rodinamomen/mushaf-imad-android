@@ -1,11 +1,11 @@
-package com.mushafimad.library.data.repository
+package com.mushafimad.core.data.repository
 
-import com.mushafimad.library.data.cache.ChaptersDataCache
-import com.mushafimad.library.data.cache.CacheStats
-import com.mushafimad.library.data.cache.QuranDataCacheService
-import com.mushafimad.library.domain.models.Part
-import com.mushafimad.library.domain.models.Quarter
-import com.mushafimad.library.domain.repository.QuranRepository
+import com.mushafimad.core.data.cache.ChaptersDataCache
+import com.mushafimad.core.data.cache.CacheStats
+import com.mushafimad.core.data.cache.QuranDataCacheService
+import com.mushafimad.core.domain.models.Part
+import com.mushafimad.core.domain.models.Quarter
+import com.mushafimad.core.domain.repository.QuranRepository
 import javax.inject.Inject
 import javax.inject.Singleton
 

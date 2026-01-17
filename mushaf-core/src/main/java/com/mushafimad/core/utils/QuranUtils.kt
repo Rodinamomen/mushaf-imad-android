@@ -1,4 +1,4 @@
-package com.mushafimad.library.utils
+package com.mushafimad.core.utils
 
 /**
  * Utility functions for Quran-related operations

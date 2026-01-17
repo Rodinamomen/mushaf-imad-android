@@ -1,4 +1,4 @@
-package com.mushafimad.library.domain.models
+package com.mushafimad.core.domain.models
 
 /**
  * Domain model for Verse highlight rectangle

@@ -1,10 +1,10 @@
-package com.mushafimad.library
+package com.mushafimad.core
 
 import android.content.Context
-import com.mushafimad.library.logging.MushafAnalytics
-import com.mushafimad.library.logging.MushafLogger
-import com.mushafimad.library.logging.DefaultMushafLogger
-import com.mushafimad.library.logging.NoOpMushafAnalytics
+import com.mushafimad.core.logging.MushafAnalytics
+import com.mushafimad.core.logging.MushafLogger
+import com.mushafimad.core.logging.DefaultMushafLogger
+import com.mushafimad.core.logging.NoOpMushafAnalytics
 
 /**
  * Main entry point for MushafImad library
@@ -28,7 +28,7 @@ object MushafLibrary {
     private var isInitialized = false
     private var applicationContext: Context? = null
 
-    internal var logger: MushafLogger = DefaultMushafLogger()
+    var logger: MushafLogger = DefaultMushafLogger()
         private set
 
     internal var analytics: MushafAnalytics = NoOpMushafAnalytics()

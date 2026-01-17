@@ -1,16 +1,16 @@
-package com.mushafimad.library.di
+package com.mushafimad.core.di
 
 import android.content.Context
-import com.mushafimad.library.data.cache.ChaptersDataCache
-import com.mushafimad.library.data.cache.QuranDataCacheService
-import com.mushafimad.library.data.repository.*
-import com.mushafimad.library.domain.repository.BookmarkRepository
-import com.mushafimad.library.domain.repository.ChapterRepository
-import com.mushafimad.library.domain.repository.PageRepository
-import com.mushafimad.library.domain.repository.QuranRepository
-import com.mushafimad.library.domain.repository.ReadingHistoryRepository
-import com.mushafimad.library.domain.repository.SearchHistoryRepository
-import com.mushafimad.library.domain.repository.VerseRepository
+import com.mushafimad.core.data.cache.ChaptersDataCache
+import com.mushafimad.core.data.cache.QuranDataCacheService
+import com.mushafimad.core.data.repository.*
+import com.mushafimad.core.domain.repository.BookmarkRepository
+import com.mushafimad.core.domain.repository.ChapterRepository
+import com.mushafimad.core.domain.repository.PageRepository
+import com.mushafimad.core.domain.repository.QuranRepository
+import com.mushafimad.core.domain.repository.ReadingHistoryRepository
+import com.mushafimad.core.domain.repository.SearchHistoryRepository
+import com.mushafimad.core.domain.repository.VerseRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

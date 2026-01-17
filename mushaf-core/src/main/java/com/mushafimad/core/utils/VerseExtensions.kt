@@ -1,6 +1,6 @@
-package com.mushafimad.library.utils
+package com.mushafimad.core.utils
 
-import com.mushafimad.library.domain.models.Verse
+import com.mushafimad.core.domain.models.Verse
 
 /**
  * Extension functions for Verse model

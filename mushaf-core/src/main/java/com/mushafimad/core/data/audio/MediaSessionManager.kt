@@ -1,4 +1,4 @@
-package com.mushafimad.library.data.audio
+package com.mushafimad.core.data.audio
 
 import android.content.ComponentName
 import android.content.Context
@@ -11,7 +11,7 @@ import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
-import com.mushafimad.library.MushafLibrary
+import com.mushafimad.core.MushafLibrary
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

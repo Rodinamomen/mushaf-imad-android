@@ -1,9 +1,9 @@
-package com.mushafimad.library.data.audio
+package com.mushafimad.core.data.audio
 
 import android.content.Context
-import com.mushafimad.library.MushafLibrary
-import com.mushafimad.library.domain.models.AyahTiming
-import com.mushafimad.library.domain.models.ReciterTiming
+import com.mushafimad.core.MushafLibrary
+import com.mushafimad.core.domain.models.AyahTiming
+import com.mushafimad.core.domain.models.ReciterTiming
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
@@ -14,7 +14,7 @@ import javax.inject.Singleton
  * Internal implementation - not exposed in public API
  */
 @Singleton
-internal class AyahTimingService @Inject constructor(
+class AyahTimingService @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     private val json = Json {

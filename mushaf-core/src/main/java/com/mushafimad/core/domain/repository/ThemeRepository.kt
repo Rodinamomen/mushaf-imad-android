@@ -1,8 +1,8 @@
-package com.mushafimad.library.domain.repository
+package com.mushafimad.core.domain.repository
 
-import com.mushafimad.library.domain.models.ColorScheme
-import com.mushafimad.library.domain.models.ThemeConfig
-import com.mushafimad.library.domain.models.ThemeMode
+import com.mushafimad.core.domain.models.ColorScheme
+import com.mushafimad.core.domain.models.ThemeConfig
+import com.mushafimad.core.domain.models.ThemeMode
 import kotlinx.coroutines.flow.Flow
 
 /**

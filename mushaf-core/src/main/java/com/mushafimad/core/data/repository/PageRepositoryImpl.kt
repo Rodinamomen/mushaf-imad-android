@@ -1,10 +1,10 @@
-package com.mushafimad.library.data.repository
+package com.mushafimad.core.data.repository
 
-import com.mushafimad.library.data.cache.QuranDataCacheService
-import com.mushafimad.library.domain.models.MushafType
-import com.mushafimad.library.domain.models.Page
-import com.mushafimad.library.domain.models.PageHeaderInfo
-import com.mushafimad.library.domain.repository.PageRepository
+import com.mushafimad.core.data.cache.QuranDataCacheService
+import com.mushafimad.core.domain.models.MushafType
+import com.mushafimad.core.domain.models.Page
+import com.mushafimad.core.domain.models.PageHeaderInfo
+import com.mushafimad.core.domain.repository.PageRepository
 import javax.inject.Inject
 import javax.inject.Singleton
 

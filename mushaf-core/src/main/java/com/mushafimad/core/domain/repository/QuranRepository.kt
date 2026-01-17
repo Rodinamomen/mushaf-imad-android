@@ -1,8 +1,8 @@
-package com.mushafimad.library.domain.repository
+package com.mushafimad.core.domain.repository
 
-import com.mushafimad.library.data.cache.CacheStats
-import com.mushafimad.library.domain.models.Part
-import com.mushafimad.library.domain.models.Quarter
+import com.mushafimad.core.data.cache.CacheStats
+import com.mushafimad.core.domain.models.Part
+import com.mushafimad.core.domain.models.Quarter
 
 /**
  * Repository for general Quran data operations

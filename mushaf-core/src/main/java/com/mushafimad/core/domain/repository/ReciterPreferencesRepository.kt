@@ -1,4 +1,4 @@
-package com.mushafimad.library.domain.repository
+package com.mushafimad.core.domain.repository
 
 import kotlinx.coroutines.flow.Flow
 

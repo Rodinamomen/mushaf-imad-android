@@ -1,9 +1,9 @@
-package com.mushafimad.library.data.audio
+package com.mushafimad.core.data.audio
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.mushafimad.library.MushafLibrary
-import com.mushafimad.library.domain.models.ReciterInfo
+import com.mushafimad.core.MushafLibrary
+import com.mushafimad.core.domain.models.ReciterInfo
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +17,7 @@ import javax.inject.Singleton
  * Internal implementation - not exposed in public API
  */
 @Singleton
-internal class ReciterService @Inject constructor(
+class ReciterService @Inject constructor(
     @ApplicationContext private val context: Context,
     private val ayahTimingService: AyahTimingService,
     private val prefs: SharedPreferences

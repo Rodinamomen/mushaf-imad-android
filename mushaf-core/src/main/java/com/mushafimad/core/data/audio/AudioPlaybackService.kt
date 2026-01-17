@@ -1,4 +1,4 @@
-package com.mushafimad.library.data.audio
+package com.mushafimad.core.data.audio
 
 import android.app.PendingIntent
 import android.content.Intent
@@ -19,8 +19,8 @@ import androidx.media3.session.SessionResult
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
-import com.mushafimad.library.MushafLibrary
-import com.mushafimad.library.domain.repository.ChapterRepository
+import com.mushafimad.core.MushafLibrary
+import com.mushafimad.core.domain.repository.ChapterRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

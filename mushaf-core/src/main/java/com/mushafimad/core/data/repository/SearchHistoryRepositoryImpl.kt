@@ -1,10 +1,10 @@
-package com.mushafimad.library.data.repository
+package com.mushafimad.core.data.repository
 
-import com.mushafimad.library.data.local.entities.SearchHistoryEntity
-import com.mushafimad.library.domain.models.SearchHistoryEntry
-import com.mushafimad.library.domain.models.SearchSuggestion
-import com.mushafimad.library.domain.models.SearchType
-import com.mushafimad.library.domain.repository.SearchHistoryRepository
+import com.mushafimad.core.data.local.entities.SearchHistoryEntity
+import com.mushafimad.core.domain.models.SearchHistoryEntry
+import com.mushafimad.core.domain.models.SearchSuggestion
+import com.mushafimad.core.domain.models.SearchType
+import com.mushafimad.core.domain.repository.SearchHistoryRepository
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
 import kotlinx.coroutines.Dispatchers

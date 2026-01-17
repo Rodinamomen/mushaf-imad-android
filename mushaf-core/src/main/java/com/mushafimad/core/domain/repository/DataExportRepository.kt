@@ -1,6 +1,6 @@
-package com.mushafimad.library.domain.repository
+package com.mushafimad.core.domain.repository
 
-import com.mushafimad.library.domain.models.UserDataBackup
+import com.mushafimad.core.domain.models.UserDataBackup
 
 /**
  * Repository for exporting and importing user data

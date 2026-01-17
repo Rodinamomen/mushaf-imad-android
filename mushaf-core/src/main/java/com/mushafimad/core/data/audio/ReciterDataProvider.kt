@@ -1,6 +1,6 @@
-package com.mushafimad.library.data.audio
+package com.mushafimad.core.data.audio
 
-import com.mushafimad.library.domain.models.ReciterInfo
+import com.mushafimad.core.domain.models.ReciterInfo
 
 /**
  * Provider for all available Quran reciters

@@ -1,6 +1,6 @@
-package com.mushafimad.library.domain.repository
+package com.mushafimad.core.domain.repository
 
-import com.mushafimad.library.domain.models.MushafType
+import com.mushafimad.core.domain.models.MushafType
 import kotlinx.coroutines.flow.Flow
 
 /**

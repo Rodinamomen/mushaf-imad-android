@@ -1,8 +1,8 @@
-package com.mushafimad.library.domain.repository
+package com.mushafimad.core.domain.repository
 
-import com.mushafimad.library.domain.models.SearchHistoryEntry
-import com.mushafimad.library.domain.models.SearchSuggestion
-import com.mushafimad.library.domain.models.SearchType
+import com.mushafimad.core.domain.models.SearchHistoryEntry
+import com.mushafimad.core.domain.models.SearchSuggestion
+import com.mushafimad.core.domain.models.SearchType
 import kotlinx.coroutines.flow.Flow
 
 /**

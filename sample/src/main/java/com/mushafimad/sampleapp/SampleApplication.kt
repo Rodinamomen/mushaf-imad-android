@@ -1,7 +1,7 @@
 package com.mushafimad.sampleapp
 
 import android.app.Application
-import com.mushafimad.library.MushafLibrary
+import com.mushafimad.core.MushafLibrary
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp

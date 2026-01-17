@@ -1,11 +1,11 @@
-package com.mushafimad.library.data.repository
+package com.mushafimad.core.data.repository
 
-import com.mushafimad.library.data.cache.ChaptersDataCache
-import com.mushafimad.library.domain.models.Chapter
-import com.mushafimad.library.domain.models.ChaptersByHizb
-import com.mushafimad.library.domain.models.ChaptersByPart
-import com.mushafimad.library.domain.models.ChaptersByType
-import com.mushafimad.library.domain.repository.ChapterRepository
+import com.mushafimad.core.data.cache.ChaptersDataCache
+import com.mushafimad.core.domain.models.Chapter
+import com.mushafimad.core.domain.models.ChaptersByHizb
+import com.mushafimad.core.domain.models.ChaptersByPart
+import com.mushafimad.core.domain.models.ChaptersByType
+import com.mushafimad.core.domain.repository.ChapterRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject

@@ -1,4 +1,4 @@
-package com.mushafimad.library.data.repository
+package com.mushafimad.core.data.repository
 
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -6,7 +6,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.mushafimad.library.domain.repository.ReciterPreferencesRepository
+import com.mushafimad.core.domain.repository.ReciterPreferencesRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first

@@ -20,5 +20,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "MushafImad"
-include(":sample")
-include(":library")
+include(":mushaf-core")     // Core data layer (no Compose)
+include(":mushaf-ui")       // UI components (depends on mushaf-core)
+include(":sample")          // Sample app (depends on mushaf-ui)

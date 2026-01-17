@@ -1,12 +1,12 @@
-package com.mushafimad.library.data.repository
+package com.mushafimad.core.data.repository
 
-import com.mushafimad.library.data.audio.AudioPlayerState
-import com.mushafimad.library.data.audio.AyahTimingService
-import com.mushafimad.library.data.audio.MediaSessionManager
-import com.mushafimad.library.data.audio.ReciterDataProvider
-import com.mushafimad.library.domain.models.AyahTiming
-import com.mushafimad.library.domain.models.ReciterInfo
-import com.mushafimad.library.domain.repository.AudioRepository
+import com.mushafimad.core.data.audio.AudioPlayerState
+import com.mushafimad.core.data.audio.AyahTimingService
+import com.mushafimad.core.data.audio.MediaSessionManager
+import com.mushafimad.core.data.audio.ReciterDataProvider
+import com.mushafimad.core.domain.models.AyahTiming
+import com.mushafimad.core.domain.models.ReciterInfo
+import com.mushafimad.core.domain.repository.AudioRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton

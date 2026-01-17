@@ -1,8 +1,8 @@
-package com.mushafimad.library.domain.repository
+package com.mushafimad.core.domain.repository
 
-import com.mushafimad.library.domain.models.MushafType
-import com.mushafimad.library.domain.models.Page
-import com.mushafimad.library.domain.models.PageHeaderInfo
+import com.mushafimad.core.domain.models.MushafType
+import com.mushafimad.core.domain.models.Page
+import com.mushafimad.core.domain.models.PageHeaderInfo
 
 /**
  * Repository for Page-related operations

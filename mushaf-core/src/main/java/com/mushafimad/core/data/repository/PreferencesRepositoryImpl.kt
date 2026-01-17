@@ -1,11 +1,11 @@
-package com.mushafimad.library.data.repository
+package com.mushafimad.core.data.repository
 
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
-import com.mushafimad.library.domain.models.MushafType
-import com.mushafimad.library.domain.repository.PreferencesRepository
+import com.mushafimad.core.domain.models.MushafType
+import com.mushafimad.core.domain.repository.PreferencesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject

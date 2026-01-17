@@ -1,4 +1,4 @@
-package com.mushafimad.library.logging
+package com.mushafimad.core.logging
 
 import android.util.Log
 

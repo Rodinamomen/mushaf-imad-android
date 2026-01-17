@@ -1,7 +1,7 @@
-package com.mushafimad.library.data.repository
+package com.mushafimad.core.data.repository
 
-import com.mushafimad.library.domain.models.*
-import com.mushafimad.library.domain.repository.*
+import com.mushafimad.core.domain.models.*
+import com.mushafimad.core.domain.repository.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext

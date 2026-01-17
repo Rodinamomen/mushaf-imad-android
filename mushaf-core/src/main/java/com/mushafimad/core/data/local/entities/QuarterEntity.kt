@@ -1,4 +1,4 @@
-package com.mushafimad.library.data.local.entities
+package com.mushafimad.core.data.local.entities
 
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmList

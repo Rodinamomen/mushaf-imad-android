@@ -1,9 +1,9 @@
-package com.mushafimad.library.data.cache
+package com.mushafimad.core.data.cache
 
-import com.mushafimad.library.data.repository.RealmService
-import com.mushafimad.library.domain.models.MushafType
-import com.mushafimad.library.domain.models.PageHeaderInfo
-import com.mushafimad.library.domain.models.Verse
+import com.mushafimad.core.data.repository.RealmService
+import com.mushafimad.core.domain.models.MushafType
+import com.mushafimad.core.domain.models.PageHeaderInfo
+import com.mushafimad.core.domain.models.Verse
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject

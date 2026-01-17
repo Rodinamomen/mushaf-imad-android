@@ -1,8 +1,8 @@
-package com.mushafimad.library.data.repository
+package com.mushafimad.core.data.repository
 
-import com.mushafimad.library.data.local.entities.BookmarkEntity
-import com.mushafimad.library.domain.models.Bookmark
-import com.mushafimad.library.domain.repository.BookmarkRepository
+import com.mushafimad.core.data.local.entities.BookmarkEntity
+import com.mushafimad.core.domain.models.Bookmark
+import com.mushafimad.core.domain.repository.BookmarkRepository
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
 import kotlinx.coroutines.Dispatchers

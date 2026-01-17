@@ -1,8 +1,8 @@
-package com.mushafimad.library.data.repository
+package com.mushafimad.core.data.repository
 
 import android.content.Context
-import com.mushafimad.library.data.local.entities.*
-import com.mushafimad.library.domain.models.*
+import com.mushafimad.core.data.local.entities.*
+import com.mushafimad.core.domain.models.*
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.ext.query
@@ -423,14 +423,14 @@ internal class RealmServiceImpl @Inject constructor(
         highlights1405 = highlights1405.map { it.toDomain() }
     )
 
-    private fun VerseMarkerEntity.toDomain() = com.mushafimad.library.domain.models.VerseMarker(
+    private fun VerseMarkerEntity.toDomain() = com.mushafimad.core.domain.models.VerseMarker(
         numberCodePoint = numberCodePoint,
         line = line,
         centerX = centerX,
         centerY = centerY
     )
 
-    private fun VerseHighlightEntity.toDomain() = com.mushafimad.library.domain.models.VerseHighlight(
+    private fun VerseHighlightEntity.toDomain() = com.mushafimad.core.domain.models.VerseHighlight(
         line = line,
         left = left,
         right = right

@@ -1,9 +1,9 @@
-package com.mushafimad.library.domain.repository
+package com.mushafimad.core.domain.repository
 
-import com.mushafimad.library.domain.models.LastReadPosition
-import com.mushafimad.library.domain.models.MushafType
-import com.mushafimad.library.domain.models.ReadingHistory
-import com.mushafimad.library.domain.models.ReadingStats
+import com.mushafimad.core.domain.models.LastReadPosition
+import com.mushafimad.core.domain.models.MushafType
+import com.mushafimad.core.domain.models.ReadingHistory
+import com.mushafimad.core.domain.models.ReadingStats
 import kotlinx.coroutines.flow.Flow
 
 /**

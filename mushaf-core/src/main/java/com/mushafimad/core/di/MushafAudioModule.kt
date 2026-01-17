@@ -1,9 +1,9 @@
-package com.mushafimad.library.di
+package com.mushafimad.core.di
 
-import com.mushafimad.library.data.audio.AyahTimingService
-import com.mushafimad.library.data.audio.MediaSessionManager
-import com.mushafimad.library.data.repository.AudioRepositoryImpl
-import com.mushafimad.library.domain.repository.AudioRepository
+import com.mushafimad.core.data.audio.AyahTimingService
+import com.mushafimad.core.data.audio.MediaSessionManager
+import com.mushafimad.core.data.repository.AudioRepositoryImpl
+import com.mushafimad.core.domain.repository.AudioRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

@@ -1,4 +1,4 @@
-package com.mushafimad.library.logging
+package com.mushafimad.core.logging
 
 /**
  * Interface for tracking user interactions

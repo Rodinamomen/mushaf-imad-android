@@ -1,6 +1,6 @@
-package com.mushafimad.library.utils
+package com.mushafimad.core.utils
 
-import com.mushafimad.library.domain.models.Chapter
+import com.mushafimad.core.domain.models.Chapter
 
 /**
  * Extension functions for Chapter model

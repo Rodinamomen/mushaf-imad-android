@@ -1,8 +1,8 @@
-package com.mushafimad.library.domain.repository
+package com.mushafimad.core.domain.repository
 
-import com.mushafimad.library.data.audio.AudioPlayerState
-import com.mushafimad.library.domain.models.AyahTiming
-import com.mushafimad.library.domain.models.ReciterInfo
+import com.mushafimad.core.data.audio.AudioPlayerState
+import com.mushafimad.core.domain.models.AyahTiming
+import com.mushafimad.core.domain.models.ReciterInfo
 import kotlinx.coroutines.flow.Flow
 
 /**

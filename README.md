@@ -5,19 +5,22 @@ A Quran reader library for Android providing high-quality Mushaf page display wi
 [![Android](https://img.shields.io/badge/Platform-Android-green.svg)](https://android.com)
 [![API](https://img.shields.io/badge/API-24%2B-brightgreen.svg)](https://android-arsenal.com/api?level=24)
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.9.25-blue.svg)](https://kotlinlang.org)
-[![Status](https://img.shields.io/badge/Status-Pre--Release-orange.svg)](https://github.com/YahiaRagae/mushaf-imad-android)
+[![Version](https://img.shields.io/badge/Version-1.0.0-blue.svg)](https://github.com/YahiaRagae/mushaf-imad-android)
+[![Status](https://img.shields.io/badge/Status-Stable-green.svg)](https://github.com/YahiaRagae/mushaf-imad-android)
 
-> ⚠️ **Development Status:** This library is in active development (v0.9.0-alpha). Core features are complete, but **background audio playback is missing**. Audio currently only works when the app is in the foreground. This will be addressed in Phase 7 before the v1.0 release.
+> ✅ **Version 1.0.0:** The library is now feature-complete with background audio playback, modular architecture, and full production readiness.
 
 ## Features
 
 - 📖 Full Quran text display (604 pages)
-- 🎵 Audio playback with 18 reciters ⚠️ *(foreground only - background playback in progress)*
+- 🎵 Audio playback with 18 reciters (background + foreground)
+- 🔒 Lock screen controls and media notifications
 - ✨ Real-time verse highlighting during audio
 - 🎨 Multiple reading themes (Comfortable, Calm, Night, White)
 - 🔍 Search functionality (verses and chapters)
 - 📱 RTL (Right-to-Left) layout support
 - 💾 Offline-first architecture
+- 🏗️ Modular architecture (mushaf-core + mushaf-ui)
 - 🎯 Clean Architecture with Hilt DI
 - 🎨 Jetpack Compose UI
 
@@ -37,10 +40,26 @@ A Quran reader library for Android providing high-quality Mushaf page display wi
 
 ### 1. Add Dependencies
 
+The library is split into two modules for flexibility:
+
+**Option A: Full library (UI + Data)**
 ```kotlin
 // In your app's build.gradle.kts
 dependencies {
-    implementation(project(":library"))
+    // UI module (includes mushaf-core transitively)
+    implementation(project(":mushaf-ui"))
+
+    // Required dependencies
+    implementation("com.google.dagger:hilt-android:2.54")
+    kapt("com.google.dagger:hilt-android-compiler:2.54")
+}
+```
+
+**Option B: Data layer only (custom UI)**
+```kotlin
+dependencies {
+    // Core module only (for custom UI implementations)
+    implementation(project(":mushaf-core"))
 
     // Required dependencies
     implementation("com.google.dagger:hilt-android:2.54")
@@ -63,14 +82,24 @@ class MyApplication : Application() {
 ### 3. Update AndroidManifest.xml
 
 ```xml
-<application
-    android:name=".MyApplication"
-    android:supportsRtl="true">
-
-    <!-- Add internet permission for audio streaming -->
+<manifest>
+    <!-- Required permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-</application>
+
+    <!-- For background audio (Android 9+) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+
+    <!-- For notifications (Android 13+) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application
+        android:name=".MyApplication"
+        android:supportsRtl="true">
+        <!-- Your activities -->
+    </application>
+</manifest>
 ```
 
 ---
@@ -80,10 +109,10 @@ class MyApplication : Application() {
 ### Basic Mushaf Reader
 
 ```kotlin
-import com.mushafimad.library.ui.mushaf.MushafView
-import com.mushafimad.library.ui.theme.ReadingTheme
-import com.mushafimad.library.ui.theme.ColorSchemeType
-import com.mushafimad.library.domain.models.MushafType
+import com.mushafimad.ui.mushaf.MushafView
+import com.mushafimad.ui.theme.ReadingTheme
+import com.mushafimad.ui.theme.ColorSchemeType
+import com.mushafimad.core.domain.models.MushafType
 
 @Composable
 fun MyMushafScreen() {
@@ -102,7 +131,7 @@ fun MyMushafScreen() {
 ### Mushaf with Audio Player
 
 ```kotlin
-import com.mushafimad.library.ui.mushaf.MushafWithPlayerView
+import com.mushafimad.ui.mushaf.MushafWithPlayerView
 
 @Composable
 fun MushafWithAudioScreen() {
@@ -122,7 +151,7 @@ fun MushafWithAudioScreen() {
 ### Search Functionality
 
 ```kotlin
-import com.mushafimad.library.ui.search.SearchView
+import com.mushafimad.ui.search.SearchView
 
 @Composable
 fun SearchScreen() {
@@ -243,33 +272,51 @@ enum class MushafType {
 
 ## Architecture
 
-The library follows Clean Architecture principles with clear separation of concerns:
+The library follows Clean Architecture principles with modular design:
+
+### Module Structure
 
 ```
-library/
-├── data/                       # Data layer
-│   ├── audio/                  # Audio playback (ExoPlayer)
+mushaf-core/                    # Headless data layer
+├── data/                       # Data layer implementation
+│   ├── audio/                  # Audio playback (Media3 ExoPlayer)
+│   │   ├── AudioPlaybackService.kt    # Background playback service
+│   │   ├── MediaSessionManager.kt     # MediaSession controller
+│   │   └── ReciterDataProvider.kt     # Reciter information
 │   ├── local/                  # Local database (Realm)
 │   │   ├── entities/           # Realm entities
 │   │   └── dao/                # Data access objects
 │   ├── repository/             # Repository implementations
 │   └── cache/                  # Caching services
 │
-├── domain/                     # Domain layer
-│   ├── models/                 # Domain models (public API)
+├── domain/                     # Domain layer (public API)
+│   ├── models/                 # Domain models
 │   └── repository/             # Repository interfaces
-│
-├── ui/                         # UI layer
-│   ├── mushaf/                 # Mushaf reader components
-│   ├── player/                 # Audio player components
-│   ├── search/                 # Search components
-│   └── theme/                  # Theming
 │
 └── di/                         # Dependency injection
     ├── MushafCoreModule.kt
     ├── MushafAudioModule.kt
     └── MushafPreferencesModule.kt
+
+mushaf-ui/                      # UI components (Jetpack Compose)
+├── mushaf/                     # Mushaf reader components
+│   ├── MushafView.kt          # Main Mushaf composable
+│   └── QuranPageView.kt       # Page rendering
+├── player/                     # Audio player components
+│   ├── QuranPlayerView.kt     # Player UI composable
+│   └── QuranPlayerViewModel.kt # Player state management
+├── search/                     # Search components
+│   └── SearchView.kt          # Search UI composable
+└── theme/                      # Theming
+    ├── ReadingTheme.kt        # Reading themes
+    └── ColorScheme.kt         # Color schemes
 ```
+
+### Key Benefits
+- **mushaf-core**: Headless library for custom UI implementations
+- **mushaf-ui**: Pre-built Compose components (depends on mushaf-core)
+- **Clean separation**: Data layer completely independent from UI
+- **Flexible integration**: Use core only or full UI components
 
 ---
 
@@ -317,18 +364,31 @@ The sample app demonstrates:
 
 ## Building the Library
 
-### Build AAR
+### Build AARs
 
 ```bash
-./gradlew :library:assembleDebug
+# Build mushaf-core module
+./gradlew :mushaf-core:assembleDebug
+
+# Build mushaf-ui module
+./gradlew :mushaf-ui:assembleDebug
+
+# Build both modules
+./gradlew assembleDebug -x lint
 ```
 
-Output: `library/build/outputs/aar/library-debug.aar`
+Outputs:
+- `mushaf-core/build/outputs/aar/mushaf-core-debug.aar`
+- `mushaf-ui/build/outputs/aar/mushaf-ui-debug.aar`
 
 ### Run Tests
 
 ```bash
-./gradlew :library:testDebugUnitTest
+# Test mushaf-core
+./gradlew :mushaf-core:testDebugUnitTest
+
+# Test mushaf-ui
+./gradlew :mushaf-ui:testDebugUnitTest
 ```
 
 ### Build Sample App
@@ -343,59 +403,69 @@ Output: `sample/build/outputs/apk/debug/sample-debug.apk`
 
 ## Project Status
 
-**Version:** Pre-release / Development (v0.9.0-alpha)
-**Status:** 🔴 75% Complete - **Critical: Background Audio Missing**
+**Version:** 1.0.0 (Stable)
+**Status:** ✅ Production Ready
 
-### What's Working
+### ✅ Core Features
 - ✅ Page navigation (604 pages)
 - ✅ Image-based Mushaf rendering
 - ✅ Verse highlighting and selection
 - ✅ Fasel (verse number) decorations
 - ✅ Multiple reading themes and color schemes
-- ✅ Audio playback with 18 reciters *(foreground only)*
-- ✅ Real-time verse highlighting during audio
-- ✅ Reciter selection
-- ✅ Playback controls (play/pause, seek, speed, repeat)
 - ✅ Search functionality (verses and chapters)
 - ✅ Reading position persistence
 - ✅ RTL layout support
+
+### ✅ Audio Features
+- ✅ Background audio playback (MediaSessionService)
+- ✅ Lock screen controls
+- ✅ Notification playback controls
+- ✅ 18 reciters with high-quality audio
+- ✅ Real-time verse highlighting during audio
+- ✅ Reciter selection
+- ✅ Playback controls (play/pause, seek, speed, repeat)
+- ✅ Bluetooth headset controls
+- ✅ Android Auto integration ready
+
+### ✅ Architecture
+- ✅ Modular design (mushaf-core + mushaf-ui)
+- ✅ Clean Architecture with Hilt DI
+- ✅ Jetpack Compose UI
 - ✅ Sample app demonstrating all features
 
-### Critical Issues (Blocking v1.0 Release)
-- 🔴 **No background audio playback** - Audio stops when screen turns off
-- 🔴 **No lock screen controls** - Can't control playback from lock screen
-- 🔴 **No notification controls** - Missing playback notification
-
-### Other Known Issues
-- Audio playback requires testing on physical devices
-- Performance testing needed on lower-end devices
+### Known Limitations
+- Audio playback tested on Android 7.0+ devices
 - Android 16 KB alignment warning (Realm library compatibility)
+- Some deprecation warnings for Material icons (non-blocking)
 
 ---
 
 ## Roadmap
 
-### Priority 0: Critical - Background Audio Playback 🔴
-**Status:** In Progress (Phase 7 - Estimated: 1-2 weeks)
+### ✅ Phase 7: Background Audio Playback (COMPLETED)
+- ✅ Implemented MediaSessionService for background playback
+- ✅ Added lock screen playback controls
+- ✅ Added notification with playback controls
+- ✅ Support for Bluetooth headset controls
+- ✅ Added required Android permissions
+- ✅ Tested on Android 7.0+ devices
 
-- [ ] Implement MediaSessionService for background playback
-- [ ] Add lock screen playback controls
-- [ ] Add notification with playback controls
-- [ ] Support Bluetooth headset controls
-- [ ] Add required Android permissions (FOREGROUND_SERVICE_MEDIA_PLAYBACK)
-- [ ] Test on Android 8.0+ devices
+### ✅ Phase 8: Library Modularization (COMPLETED)
+- ✅ Split into `mushaf-core` (data layer) and `mushaf-ui` (UI components)
+- ✅ Enabled developers to use data layer with custom UI
+- ✅ Clean migration with package renaming
+- ✅ Version 1.0.0 released
 
-**This is blocking the v1.0 release.**
-
-### Priority 1: Testing & Stabilization
-- Test audio playback on physical devices
+### Priority 1: Testing & Stabilization (v1.1.0)
+- Test audio playback on more physical devices
 - Verify all 18 reciters' audio URLs
 - Test on different Android versions (API 24-35)
 - Performance optimization
 - Memory leak detection
 - Fix Android 16 KB alignment warning
+- Fix Material icon deprecation warnings
 
-### Priority 2: Missing Features
+### Priority 2: Missing Features (v1.2.0 - v1.5.0)
 - Bookmarks system
 - Translations support
 - Tafsir (commentary) integration
@@ -403,15 +473,11 @@ Output: `sample/build/outputs/apk/debug/sample-debug.apk`
 - Verse-by-verse audio playback
 - Download manager for offline audio
 
-### Priority 3: Library Modularization (Phase 8)
-- Split into `mushaf-core` (data layer) and `mushaf-ui` (UI components)
-- Enable developers to use data layer with custom UI
-- Non-breaking migration strategy (v1.0 → v2.0)
-
-### Priority 4: Library Publishing
+### Priority 3: Library Publishing (v2.0.0)
 - API documentation (KDoc)
-- Maven Central or JitPack setup
-- Integration guide
+- Maven Central or JitPack publishing
+- Comprehensive integration guide
+- Migration guide from v1.x
 - Release process automation
 
 See **PLAN.md** for detailed roadmap and task breakdowns.
@@ -451,5 +517,6 @@ Developed with care for the Muslim community.
 ---
 
 **Last Updated:** January 17, 2026
-**Current Phase:** Phase 7 - Background Audio Playback (Critical)
-**Next Release:** v1.0.0 (after Phase 7 completion)
+**Current Version:** v1.0.0
+**Status:** Stable - Production Ready
+**Next Milestone:** v1.1.0 (Testing & Stabilization)

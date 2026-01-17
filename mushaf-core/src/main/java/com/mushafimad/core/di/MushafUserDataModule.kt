@@ -1,13 +1,13 @@
-package com.mushafimad.library.di
+package com.mushafimad.core.di
 
-import com.mushafimad.library.domain.repository.BookmarkRepository
-import com.mushafimad.library.domain.repository.DataExportRepository
-import com.mushafimad.library.domain.repository.PreferencesRepository
-import com.mushafimad.library.domain.repository.ReadingHistoryRepository
-import com.mushafimad.library.domain.repository.ReciterPreferencesRepository
-import com.mushafimad.library.domain.repository.SearchHistoryRepository
-import com.mushafimad.library.domain.repository.ThemeRepository
-import com.mushafimad.library.data.repository.DataExportRepositoryImpl
+import com.mushafimad.core.domain.repository.BookmarkRepository
+import com.mushafimad.core.domain.repository.DataExportRepository
+import com.mushafimad.core.domain.repository.PreferencesRepository
+import com.mushafimad.core.domain.repository.ReadingHistoryRepository
+import com.mushafimad.core.domain.repository.ReciterPreferencesRepository
+import com.mushafimad.core.domain.repository.SearchHistoryRepository
+import com.mushafimad.core.domain.repository.ThemeRepository
+import com.mushafimad.core.data.repository.DataExportRepositoryImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

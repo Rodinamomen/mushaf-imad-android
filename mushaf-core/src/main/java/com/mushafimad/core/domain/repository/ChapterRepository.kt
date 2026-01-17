@@ -1,9 +1,9 @@
-package com.mushafimad.library.domain.repository
+package com.mushafimad.core.domain.repository
 
-import com.mushafimad.library.domain.models.Chapter
-import com.mushafimad.library.domain.models.ChaptersByHizb
-import com.mushafimad.library.domain.models.ChaptersByPart
-import com.mushafimad.library.domain.models.ChaptersByType
+import com.mushafimad.core.domain.models.Chapter
+import com.mushafimad.core.domain.models.ChaptersByHizb
+import com.mushafimad.core.domain.models.ChaptersByPart
+import com.mushafimad.core.domain.models.ChaptersByType
 import kotlinx.coroutines.flow.Flow
 
 /**

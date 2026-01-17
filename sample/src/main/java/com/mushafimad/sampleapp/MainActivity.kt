@@ -27,12 +27,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.mushafimad.library.domain.models.MushafType
-import com.mushafimad.library.ui.mushaf.MushafView
-import com.mushafimad.library.ui.mushaf.MushafWithPlayerView
-import com.mushafimad.library.ui.search.SearchView
-import com.mushafimad.library.ui.theme.ColorSchemeType
-import com.mushafimad.library.ui.theme.ReadingTheme
+import com.mushafimad.core.domain.models.MushafType
+import com.mushafimad.ui.mushaf.MushafView
+import com.mushafimad.ui.mushaf.MushafWithPlayerView
+import com.mushafimad.ui.search.SearchView
+import com.mushafimad.ui.theme.ColorSchemeType
+import com.mushafimad.ui.theme.ReadingTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 /**

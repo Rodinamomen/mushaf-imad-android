@@ -1,6 +1,6 @@
-package com.mushafimad.library.data.repository
+package com.mushafimad.core.data.repository
 
-import com.mushafimad.library.domain.models.*
+import com.mushafimad.core.domain.models.*
 
 /**
  * Facade around the bundled Realm database that powers Quran metadata

@@ -54,8 +54,8 @@ android {
 }
 
 dependencies {
-    // Library module
-    implementation(project(":library"))
+    // Mushaf UI module (includes mushaf-core transitively)
+    implementation(project(":mushaf-ui"))
 
     // Kotlin
     implementation(libs.kotlin.stdlib)

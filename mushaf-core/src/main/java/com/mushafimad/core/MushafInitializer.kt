@@ -1,7 +1,7 @@
-package com.mushafimad.library
+package com.mushafimad.core
 
 import android.content.Context
-import com.mushafimad.library.domain.repository.QuranRepository
+import com.mushafimad.core.domain.repository.QuranRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

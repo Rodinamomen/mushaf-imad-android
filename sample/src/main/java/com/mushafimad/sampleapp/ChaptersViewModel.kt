@@ -2,8 +2,8 @@ package com.mushafimad.sampleapp
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mushafimad.library.domain.models.Chapter
-import com.mushafimad.library.domain.repository.ChapterRepository
+import com.mushafimad.core.domain.models.Chapter
+import com.mushafimad.core.domain.repository.ChapterRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

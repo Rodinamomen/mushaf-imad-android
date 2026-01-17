@@ -1,7 +1,7 @@
-package com.mushafimad.library.domain.repository
+package com.mushafimad.core.domain.repository
 
-import com.mushafimad.library.domain.models.MushafType
-import com.mushafimad.library.domain.models.Verse
+import com.mushafimad.core.domain.models.MushafType
+import com.mushafimad.core.domain.models.Verse
 
 /**
  * Repository for Verse-related operations

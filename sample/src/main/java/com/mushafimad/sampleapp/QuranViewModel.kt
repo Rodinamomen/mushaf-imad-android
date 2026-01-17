@@ -2,13 +2,13 @@ package com.mushafimad.sampleapp
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mushafimad.library.domain.models.MushafType
-import com.mushafimad.library.domain.models.PageHeaderInfo
-import com.mushafimad.library.domain.models.Verse
-import com.mushafimad.library.domain.repository.PageRepository
-import com.mushafimad.library.domain.repository.PreferencesRepository
-import com.mushafimad.library.domain.repository.QuranRepository
-import com.mushafimad.library.domain.repository.VerseRepository
+import com.mushafimad.core.domain.models.MushafType
+import com.mushafimad.core.domain.models.PageHeaderInfo
+import com.mushafimad.core.domain.models.Verse
+import com.mushafimad.core.domain.repository.PageRepository
+import com.mushafimad.core.domain.repository.PreferencesRepository
+import com.mushafimad.core.domain.repository.QuranRepository
+import com.mushafimad.core.domain.repository.VerseRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

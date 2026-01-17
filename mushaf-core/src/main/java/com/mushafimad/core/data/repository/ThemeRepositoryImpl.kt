@@ -1,14 +1,14 @@
-package com.mushafimad.library.data.repository
+package com.mushafimad.core.data.repository
 
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.mushafimad.library.domain.models.ColorScheme
-import com.mushafimad.library.domain.models.ThemeConfig
-import com.mushafimad.library.domain.models.ThemeMode
-import com.mushafimad.library.domain.repository.ThemeRepository
+import com.mushafimad.core.domain.models.ColorScheme
+import com.mushafimad.core.domain.models.ThemeConfig
+import com.mushafimad.core.domain.models.ThemeMode
+import com.mushafimad.core.domain.repository.ThemeRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first

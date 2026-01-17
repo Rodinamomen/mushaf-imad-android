@@ -1,13 +1,13 @@
-package com.mushafimad.library.di
+package com.mushafimad.core.di
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.mushafimad.library.data.repository.PreferencesRepositoryImpl
-import com.mushafimad.library.data.repository.ReciterPreferencesRepositoryImpl
-import com.mushafimad.library.data.repository.ThemeRepositoryImpl
-import com.mushafimad.library.domain.repository.PreferencesRepository
-import com.mushafimad.library.domain.repository.ReciterPreferencesRepository
-import com.mushafimad.library.domain.repository.ThemeRepository
+import com.mushafimad.core.data.repository.PreferencesRepositoryImpl
+import com.mushafimad.core.data.repository.ReciterPreferencesRepositoryImpl
+import com.mushafimad.core.data.repository.ThemeRepositoryImpl
+import com.mushafimad.core.domain.repository.PreferencesRepository
+import com.mushafimad.core.domain.repository.ReciterPreferencesRepository
+import com.mushafimad.core.domain.repository.ThemeRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
