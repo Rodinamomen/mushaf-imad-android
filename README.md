@@ -509,21 +509,9 @@ See **PLAN.md** for detailed roadmap and task breakdowns.
 
 ---
 
-## Contributing
-
-This is a private project. For questions or contributions, please contact the project maintainer.
-
----
-
 ## Repository
 
 **GitHub:** [https://github.com/YahiaRagae/mushaf-imad-android](https://github.com/YahiaRagae/mushaf-imad-android)
-
----
-
-## License
-
-This project is private. Contact the maintainer for licensing information.
 
 ---
 
