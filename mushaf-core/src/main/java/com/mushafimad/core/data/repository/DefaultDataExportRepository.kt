@@ -16,9 +16,7 @@ internal class DefaultDataExportRepository (
     private val bookmarkRepository: BookmarkRepository,
     private val readingHistoryRepository: ReadingHistoryRepository,
     private val searchHistoryRepository: SearchHistoryRepository,
-    private val preferencesRepository: PreferencesRepository,
-    private val reciterPreferencesRepository: ReciterPreferencesRepository,
-    private val themeRepository: ThemeRepository
+    private val preferencesRepository: PreferencesRepository
 ) : DataExportRepository {
 
 
@@ -170,10 +168,10 @@ internal class DefaultDataExportRepository (
         val mushafType = preferencesRepository.getMushafTypeFlow().first()
         val currentPage = preferencesRepository.getCurrentPageFlow().first()
         val fontSize = preferencesRepository.getFontSizeMultiplierFlow().first()
-        val reciterId = reciterPreferencesRepository.getSelectedReciterId()
-        val playbackSpeed = reciterPreferencesRepository.getPlaybackSpeed()
-        val repeatMode = reciterPreferencesRepository.getRepeatMode()
-        val themeConfig = themeRepository.getThemeConfig()
+        val reciterId = preferencesRepository.getSelectedReciterId()
+        val playbackSpeed = preferencesRepository.getPlaybackSpeed()
+        val repeatMode = preferencesRepository.getRepeatMode()
+        val themeConfig = preferencesRepository.getThemeConfig()
 
         return PreferencesData(
             mushafType = mushafType.name,
@@ -192,12 +190,12 @@ internal class DefaultDataExportRepository (
         preferencesRepository.setMushafType(MushafType.valueOf(prefs.mushafType))
         preferencesRepository.setCurrentPage(prefs.currentPage)
         preferencesRepository.setFontSizeMultiplier(prefs.fontSizeMultiplier)
-        reciterPreferencesRepository.setSelectedReciterId(prefs.selectedReciterId)
-        reciterPreferencesRepository.setPlaybackSpeed(prefs.playbackSpeed)
-        reciterPreferencesRepository.setRepeatMode(prefs.repeatMode)
-        themeRepository.setThemeMode(ThemeMode.valueOf(prefs.themeMode))
-        themeRepository.setColorScheme(ColorScheme.valueOf(prefs.colorScheme))
-        themeRepository.setAmoledMode(prefs.useAmoled)
+        preferencesRepository.setSelectedReciterId(prefs.selectedReciterId)
+        preferencesRepository.setPlaybackSpeed(prefs.playbackSpeed)
+        preferencesRepository.setRepeatMode(prefs.repeatMode)
+        preferencesRepository.setThemeMode(ThemeMode.valueOf(prefs.themeMode))
+        preferencesRepository.setColorScheme(ColorScheme.valueOf(prefs.colorScheme))
+        preferencesRepository.setAmoledMode(prefs.useAmoled)
     }
 
     private fun Bookmark.toBackupData() = BookmarkData(

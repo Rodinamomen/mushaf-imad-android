@@ -188,20 +188,6 @@ object MushafLibrary : KoinComponent {
     fun getPreferencesRepository(): PreferencesRepository = get()
 
     /**
-     * Get ReciterPreferencesRepository for managing reciter-specific preferences
-     * @return ReciterPreferencesRepository singleton instance
-     */
-    @JvmStatic
-    fun getReciterPreferencesRepository(): ReciterPreferencesRepository = get()
-
-    /**
-     * Get ThemeRepository for managing theme preferences
-     * @return ThemeRepository singleton instance
-     */
-    @JvmStatic
-    fun getThemeRepository(): ThemeRepository = get()
-
-    /**
      * Get DataExportRepository for exporting user data
      * @return DataExportRepository singleton instance
      */

@@ -1,13 +1,23 @@
 package com.mushafimad.core.domain.repository
 
+import com.mushafimad.core.domain.models.ColorScheme
 import com.mushafimad.core.domain.models.MushafType
+import com.mushafimad.core.domain.models.ThemeConfig
+import com.mushafimad.core.domain.models.ThemeMode
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Repository for user preferences and settings
+ * Repository for all user preferences and settings
  * Public API - exposed to library consumers
+ *
+ * Consolidated repository for:
+ * - Mushaf reading preferences (page, chapter, verse, font size, translation)
+ * - Audio preferences (reciter, playback speed, repeat mode)
+ * - Theme preferences (theme mode, color scheme, AMOLED mode)
  */
 interface PreferencesRepository {
+
+    // ========== Mushaf Reading Preferences ==========
 
     /**
      * Get the selected Mushaf type as a Flow
@@ -68,6 +78,94 @@ interface PreferencesRepository {
      * Set whether to show translation
      */
     suspend fun setShowTranslation(show: Boolean)
+
+    // ========== Audio Preferences ==========
+
+    /**
+     * Observe the selected reciter ID
+     */
+    fun getSelectedReciterIdFlow(): Flow<Int>
+
+    /**
+     * Get the selected reciter ID
+     */
+    suspend fun getSelectedReciterId(): Int
+
+    /**
+     * Set the selected reciter ID
+     * @param reciterId The reciter ID to save
+     */
+    suspend fun setSelectedReciterId(reciterId: Int)
+
+    /**
+     * Observe the selected playback speed
+     */
+    fun getPlaybackSpeedFlow(): Flow<Float>
+
+    /**
+     * Get the selected playback speed
+     */
+    suspend fun getPlaybackSpeed(): Float
+
+    /**
+     * Set the playback speed
+     * @param speed Playback speed (0.5 - 3.0)
+     */
+    suspend fun setPlaybackSpeed(speed: Float)
+
+    /**
+     * Observe repeat mode
+     */
+    fun getRepeatModeFlow(): Flow<Boolean>
+
+    /**
+     * Get repeat mode
+     */
+    suspend fun getRepeatMode(): Boolean
+
+    /**
+     * Set repeat mode
+     * @param enabled Whether repeat is enabled
+     */
+    suspend fun setRepeatMode(enabled: Boolean)
+
+    // ========== Theme Preferences ==========
+
+    /**
+     * Observe theme configuration
+     */
+    fun getThemeConfigFlow(): Flow<ThemeConfig>
+
+    /**
+     * Get current theme configuration
+     */
+    suspend fun getThemeConfig(): ThemeConfig
+
+    /**
+     * Set theme mode
+     * @param mode The theme mode (LIGHT, DARK, SYSTEM)
+     */
+    suspend fun setThemeMode(mode: ThemeMode)
+
+    /**
+     * Set color scheme
+     * @param scheme The color scheme
+     */
+    suspend fun setColorScheme(scheme: ColorScheme)
+
+    /**
+     * Set AMOLED mode (pure black for dark theme)
+     * @param enabled Whether to use AMOLED black
+     */
+    suspend fun setAmoledMode(enabled: Boolean)
+
+    /**
+     * Update complete theme configuration
+     * @param config The new theme configuration
+     */
+    suspend fun updateThemeConfig(config: ThemeConfig)
+
+    // ========== General ==========
 
     /**
      * Clear all preferences

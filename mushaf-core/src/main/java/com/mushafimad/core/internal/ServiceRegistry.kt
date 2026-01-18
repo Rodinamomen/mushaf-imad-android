@@ -7,10 +7,10 @@ import com.mushafimad.core.data.audio.MediaSessionManager
 import com.mushafimad.core.data.audio.ReciterService
 import com.mushafimad.core.data.cache.ChaptersDataCache
 import com.mushafimad.core.data.cache.QuranDataCacheService
-import com.mushafimad.core.data.repository.DefaultReciterPreferencesRepository
+import com.mushafimad.core.data.repository.DefaultPreferencesRepository
 import com.mushafimad.core.data.repository.RealmService
 import com.mushafimad.core.data.repository.DefaultRealmService
-import com.mushafimad.core.domain.repository.ReciterPreferencesRepository
+import com.mushafimad.core.domain.repository.PreferencesRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -34,7 +34,7 @@ internal object ServiceRegistry {
     @Volatile private var _ayahTimingService: AyahTimingService? = null
     @Volatile private var _mediaSessionManager: MediaSessionManager? = null
     @Volatile private var _sharedPreferences: SharedPreferences? = null
-    @Volatile private var _reciterPreferencesRepository: ReciterPreferencesRepository? = null
+    @Volatile private var _preferencesRepository: PreferencesRepository? = null
     @Volatile private var _chaptersCache: ChaptersDataCache? = null
     @Volatile private var _quranCacheService: QuranDataCacheService? = null
 
@@ -101,12 +101,13 @@ internal object ServiceRegistry {
     }
 
     /**
-     * Get ReciterPreferencesRepository singleton.
+     * Get PreferencesRepository singleton.
      * Thread-safe lazy initialization.
+     * Consolidated repository for all user preferences (Mushaf, Audio, Theme).
      */
-    fun getReciterPreferencesRepository(): ReciterPreferencesRepository = _reciterPreferencesRepository ?: synchronized(lock) {
-        _reciterPreferencesRepository ?: DefaultReciterPreferencesRepository(getContext()).also {
-            _reciterPreferencesRepository = it
+    fun getPreferencesRepository(): PreferencesRepository = _preferencesRepository ?: synchronized(lock) {
+        _preferencesRepository ?: DefaultPreferencesRepository(getContext()).also {
+            _preferencesRepository = it
         }
     }
 
@@ -118,7 +119,7 @@ internal object ServiceRegistry {
         _reciterService ?: ReciterService(
             getContext(),
             getAyahTimingService(),
-            getReciterPreferencesRepository()
+            getPreferencesRepository()
         ).also { _reciterService = it }
     }
 

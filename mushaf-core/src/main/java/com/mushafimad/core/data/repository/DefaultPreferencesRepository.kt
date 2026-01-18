@@ -4,16 +4,21 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
+import com.mushafimad.core.domain.models.ColorScheme
 import com.mushafimad.core.domain.models.MushafType
+import com.mushafimad.core.domain.models.ThemeConfig
+import com.mushafimad.core.domain.models.ThemeMode
 import com.mushafimad.core.domain.repository.PreferencesRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 // Extension property for DataStore
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "mushaf_preferences")
 
 /**
- * Implementation of PreferencesRepository using DataStore
+ * Consolidated implementation of PreferencesRepository using DataStore
+ * Stores all user preferences in a single DataStore file
  * Internal API - not exposed to library consumers
  */
 internal class DefaultPreferencesRepository (
@@ -23,6 +28,7 @@ internal class DefaultPreferencesRepository (
     private val dataStore = context.dataStore
 
     companion object {
+        // Mushaf reading preferences
         private val MUSHAF_TYPE_KEY = stringPreferencesKey("mushaf_type")
         private val CURRENT_PAGE_KEY = intPreferencesKey("current_page")
         private val LAST_READ_CHAPTER_KEY = intPreferencesKey("last_read_chapter")
@@ -31,8 +37,22 @@ internal class DefaultPreferencesRepository (
         private val FONT_SIZE_MULTIPLIER_KEY = floatPreferencesKey("font_size_multiplier")
         private val SHOW_TRANSLATION_KEY = booleanPreferencesKey("show_translation")
 
+        // Audio preferences
+        private val SELECTED_RECITER_ID_KEY = intPreferencesKey("selected_reciter_id")
+        private val PLAYBACK_SPEED_KEY = floatPreferencesKey("playback_speed")
+        private val REPEAT_MODE_KEY = booleanPreferencesKey("repeat_mode")
+
+        // Theme preferences
+        private val THEME_MODE_KEY = stringPreferencesKey("theme_mode")
+        private val COLOR_SCHEME_KEY = stringPreferencesKey("color_scheme")
+        private val AMOLED_MODE_KEY = booleanPreferencesKey("amoled_mode")
+
+        // Defaults
         private const val DEFAULT_PAGE = 1
         private const val DEFAULT_FONT_SIZE_MULTIPLIER = 1.0f
+        private const val DEFAULT_RECITER_ID = 1 // Ibrahim Al-Akdar
+        private const val DEFAULT_PLAYBACK_SPEED = 1.0f
+        private const val DEFAULT_REPEAT_MODE = false
     }
 
     override fun getMushafTypeFlow(): Flow<MushafType> = dataStore.data.map { preferences ->
@@ -109,6 +129,105 @@ internal class DefaultPreferencesRepository (
             preferences[SHOW_TRANSLATION_KEY] = show
         }
     }
+
+    // ========== Audio Preferences Implementation ==========
+
+    override fun getSelectedReciterIdFlow(): Flow<Int> {
+        return dataStore.data.map { preferences ->
+            preferences[SELECTED_RECITER_ID_KEY] ?: DEFAULT_RECITER_ID
+        }
+    }
+
+    override suspend fun getSelectedReciterId(): Int {
+        return getSelectedReciterIdFlow().first()
+    }
+
+    override suspend fun setSelectedReciterId(reciterId: Int) {
+        dataStore.edit { preferences ->
+            preferences[SELECTED_RECITER_ID_KEY] = reciterId
+        }
+    }
+
+    override fun getPlaybackSpeedFlow(): Flow<Float> {
+        return dataStore.data.map { preferences ->
+            preferences[PLAYBACK_SPEED_KEY] ?: DEFAULT_PLAYBACK_SPEED
+        }
+    }
+
+    override suspend fun getPlaybackSpeed(): Float {
+        return getPlaybackSpeedFlow().first()
+    }
+
+    override suspend fun setPlaybackSpeed(speed: Float) {
+        val clampedSpeed = speed.coerceIn(0.5f, 3.0f)
+        dataStore.edit { preferences ->
+            preferences[PLAYBACK_SPEED_KEY] = clampedSpeed
+        }
+    }
+
+    override fun getRepeatModeFlow(): Flow<Boolean> {
+        return dataStore.data.map { preferences ->
+            preferences[REPEAT_MODE_KEY] ?: DEFAULT_REPEAT_MODE
+        }
+    }
+
+    override suspend fun getRepeatMode(): Boolean {
+        return getRepeatModeFlow().first()
+    }
+
+    override suspend fun setRepeatMode(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[REPEAT_MODE_KEY] = enabled
+        }
+    }
+
+    // ========== Theme Preferences Implementation ==========
+
+    override fun getThemeConfigFlow(): Flow<ThemeConfig> {
+        return dataStore.data.map { preferences ->
+            ThemeConfig(
+                mode = preferences[THEME_MODE_KEY]?.let {
+                    ThemeMode.valueOf(it)
+                } ?: ThemeMode.SYSTEM,
+                colorScheme = preferences[COLOR_SCHEME_KEY]?.let {
+                    ColorScheme.valueOf(it)
+                } ?: ColorScheme.DEFAULT,
+                useAmoled = preferences[AMOLED_MODE_KEY] ?: false
+            )
+        }
+    }
+
+    override suspend fun getThemeConfig(): ThemeConfig {
+        return getThemeConfigFlow().first()
+    }
+
+    override suspend fun setThemeMode(mode: ThemeMode) {
+        dataStore.edit { preferences ->
+            preferences[THEME_MODE_KEY] = mode.name
+        }
+    }
+
+    override suspend fun setColorScheme(scheme: ColorScheme) {
+        dataStore.edit { preferences ->
+            preferences[COLOR_SCHEME_KEY] = scheme.name
+        }
+    }
+
+    override suspend fun setAmoledMode(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[AMOLED_MODE_KEY] = enabled
+        }
+    }
+
+    override suspend fun updateThemeConfig(config: ThemeConfig) {
+        dataStore.edit { preferences ->
+            preferences[THEME_MODE_KEY] = config.mode.name
+            preferences[COLOR_SCHEME_KEY] = config.colorScheme.name
+            preferences[AMOLED_MODE_KEY] = config.useAmoled
+        }
+    }
+
+    // ========== General ==========
 
     override suspend fun clearAll() {
         dataStore.edit { preferences ->

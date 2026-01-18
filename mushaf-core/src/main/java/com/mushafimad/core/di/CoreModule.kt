@@ -107,19 +107,13 @@ val coreModule = module {
         DefaultAudioRepository(get(), get(), get())
     }
 
-    // Preferences Repositories
+    // Preferences Repository (consolidated - includes Mushaf, Audio, and Theme preferences)
     single<PreferencesRepository> {
         DefaultPreferencesRepository(get())
-    }
-    single<ReciterPreferencesRepository> {
-        DefaultReciterPreferencesRepository(get())
-    }
-    single<ThemeRepository> {
-        DefaultThemeRepository(get())
     }
 
     // Data Export Repository
     single<DataExportRepository> {
-        DefaultDataExportRepository(get(), get(), get(), get(), get(), get())
+        DefaultDataExportRepository(get(), get(), get(), get())
     }
 }

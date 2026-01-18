@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.mushafimad.core.domain.models.ColorScheme
 import com.mushafimad.core.domain.models.ThemeConfig
 import com.mushafimad.core.domain.models.ThemeMode
-import com.mushafimad.core.domain.repository.ThemeRepository
+import com.mushafimad.core.domain.repository.PreferencesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
  * Dependencies are injected via Koin DI
  */
 internal class ThemeViewModel(
-    private val themeRepository: ThemeRepository
+    private val preferencesRepository: PreferencesRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ThemeUiState())
@@ -35,7 +35,7 @@ internal class ThemeViewModel(
      */
     private fun loadThemeConfig() {
         viewModelScope.launch {
-            themeRepository.getThemeConfigFlow()
+            preferencesRepository.getThemeConfigFlow()
                 .catch { error ->
                     _uiState.update {
                         it.copy(error = error.message ?: "Failed to load theme config")
@@ -58,7 +58,7 @@ internal class ThemeViewModel(
     fun setThemeMode(mode: ThemeMode) {
         viewModelScope.launch {
             try {
-                themeRepository.setThemeMode(mode)
+                preferencesRepository.setThemeMode(mode)
                 _uiState.update {
                     it.copy(successMessage = "Theme mode updated")
                 }
@@ -76,7 +76,7 @@ internal class ThemeViewModel(
     fun setColorScheme(scheme: ColorScheme) {
         viewModelScope.launch {
             try {
-                themeRepository.setColorScheme(scheme)
+                preferencesRepository.setColorScheme(scheme)
                 _uiState.update {
                     it.copy(successMessage = "Color scheme updated")
                 }
@@ -94,7 +94,7 @@ internal class ThemeViewModel(
     fun setAmoledMode(enabled: Boolean) {
         viewModelScope.launch {
             try {
-                themeRepository.setAmoledMode(enabled)
+                preferencesRepository.setAmoledMode(enabled)
                 _uiState.update {
                     it.copy(
                         successMessage = if (enabled) "AMOLED mode enabled" else "AMOLED mode disabled"
@@ -141,9 +141,9 @@ internal class ThemeViewModel(
     fun resetTheme() {
         viewModelScope.launch {
             try {
-                themeRepository.setThemeMode(ThemeMode.SYSTEM)
-                themeRepository.setColorScheme(ColorScheme.DEFAULT)
-                themeRepository.setAmoledMode(false)
+                preferencesRepository.setThemeMode(ThemeMode.SYSTEM)
+                preferencesRepository.setColorScheme(ColorScheme.DEFAULT)
+                preferencesRepository.setAmoledMode(false)
                 _uiState.update {
                     it.copy(successMessage = "Theme reset to defaults")
                 }

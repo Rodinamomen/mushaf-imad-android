@@ -73,7 +73,7 @@ val uiModule = module {
     // Theme ViewModel (1 dependency)
     viewModel {
         ThemeViewModel(
-            themeRepository = get()
+            preferencesRepository = get()
         )
     }
 }

@@ -3,7 +3,7 @@ package com.mushafimad.core.data.audio
 import android.content.Context
 import com.mushafimad.core.MushafLibrary
 import com.mushafimad.core.domain.models.ReciterInfo
-import com.mushafimad.core.domain.repository.ReciterPreferencesRepository
+import com.mushafimad.core.domain.repository.PreferencesRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 internal class ReciterService(
     private val context: Context,
     private val ayahTimingService: AyahTimingService,
-    private val reciterPreferencesRepository: ReciterPreferencesRepository
+    private val preferencesRepository: PreferencesRepository
 ) {
     companion object {
         private const val DEFAULT_RECITER_ID = 1 // Ibrahim Al-Akdar
@@ -97,7 +97,7 @@ internal class ReciterService(
             MushafLibrary.logger.info("Loaded ${reciters.count()} reciters")
 
             // Load saved reciter or use default
-            val savedReciterId = reciterPreferencesRepository.getSelectedReciterId()
+            val savedReciterId = preferencesRepository.getSelectedReciterId()
             val savedReciter = reciters.find { it.id == savedReciterId }
 
             if (savedReciter != null) {
@@ -211,7 +211,7 @@ internal class ReciterService(
      */
     private fun saveSelectedReciterId(reciterId: Int) {
         serviceScope.launch {
-            reciterPreferencesRepository.setSelectedReciterId(reciterId)
+            preferencesRepository.setSelectedReciterId(reciterId)
         }
     }
 
