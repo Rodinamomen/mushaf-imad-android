@@ -1,10 +1,9 @@
 package com.mushafimad.core.data.repository
 
+import com.mushafimad.core.data.local.dao.BookmarkDao
 import com.mushafimad.core.data.local.entities.BookmarkEntity
 import com.mushafimad.core.domain.models.Bookmark
 import com.mushafimad.core.domain.repository.BookmarkRepository
-import io.realm.kotlin.Realm
-import io.realm.kotlin.ext.query
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -12,30 +11,21 @@ import kotlinx.coroutines.withContext
 import org.mongodb.kbson.ObjectId
 
 /**
- * Default implementation of BookmarkRepository using Realm
+ * Default implementation of BookmarkRepository using BookmarkDao
  * Internal implementation - not exposed in public API
+ * Testable: DAO can be swapped with fake implementation
  */
 internal class DefaultBookmarkRepository(
-    private val realmService: RealmService
+    private val bookmarkDao: BookmarkDao
 ) : BookmarkRepository {
 
-    private val realm: Realm
-        get() = realmService.getRealm()
-
     override fun getAllBookmarksFlow(): Flow<List<Bookmark>> {
-        return realm.query<BookmarkEntity>()
-            .sort("createdAt", io.realm.kotlin.query.Sort.DESCENDING)
-            .asFlow()
-            .map { results ->
-                results.list.map { it.toDomain() }
-            }
+        return bookmarkDao.getAllFlow()
+            .map { entities -> entities.map { it.toDomain() } }
     }
 
     override suspend fun getAllBookmarks(): List<Bookmark> = withContext(Dispatchers.IO) {
-        realm.query<BookmarkEntity>()
-            .sort("createdAt", io.realm.kotlin.query.Sort.DESCENDING)
-            .find()
-            .map { it.toDomain() }
+        bookmarkDao.getAll().map { it.toDomain() }
     }
 
     override suspend fun getBookmarkById(id: String): Bookmark? = withContext(Dispatchers.IO) {
@@ -45,24 +35,15 @@ internal class DefaultBookmarkRepository(
             return@withContext null
         }
 
-        realm.query<BookmarkEntity>("id == $0", objectId)
-            .first()
-            .find()
-            ?.toDomain()
+        bookmarkDao.getById(objectId)?.toDomain()
     }
 
     override suspend fun getBookmarksForChapter(chapterNumber: Int): List<Bookmark> = withContext(Dispatchers.IO) {
-        realm.query<BookmarkEntity>("chapterNumber == $0", chapterNumber)
-            .sort("verseNumber")
-            .find()
-            .map { it.toDomain() }
+        bookmarkDao.getForChapter(chapterNumber).map { it.toDomain() }
     }
 
     override suspend fun getBookmarkForVerse(chapterNumber: Int, verseNumber: Int): Bookmark? = withContext(Dispatchers.IO) {
-        realm.query<BookmarkEntity>("chapterNumber == $0 AND verseNumber == $1", chapterNumber, verseNumber)
-            .first()
-            .find()
-            ?.toDomain()
+        bookmarkDao.getForVerse(chapterNumber, verseNumber)?.toDomain()
     }
 
     override suspend fun addBookmark(
@@ -72,105 +53,47 @@ internal class DefaultBookmarkRepository(
         note: String,
         tags: List<String>
     ): Bookmark = withContext(Dispatchers.IO) {
-        // Check if bookmark already exists
-        val existing = getBookmarkForVerse(chapterNumber, verseNumber)
-        if (existing != null) {
-            // Update existing bookmark
-            realm.write {
-                val entity = query<BookmarkEntity>("chapterNumber == $0 AND verseNumber == $1", chapterNumber, verseNumber)
-                    .first()
-                    .find()
-
-                entity?.apply {
-                    this.note = note
-                    this.tags = tags.joinToString(",")
-                    this.createdAt = System.currentTimeMillis()
-                }
-            }
-            return@withContext getBookmarkForVerse(chapterNumber, verseNumber)!!
-        }
-
-        // Create new bookmark
-        val bookmarkId = realm.write {
-            val entity = BookmarkEntity().apply {
-                this.chapterNumber = chapterNumber
-                this.verseNumber = verseNumber
-                this.pageNumber = pageNumber
-                this.createdAt = System.currentTimeMillis()
-                this.note = note
-                this.tags = tags.joinToString(",")
-            }
-            copyToRealm(entity).id
-        }
+        val bookmarkId = bookmarkDao.upsert(
+            chapterNumber = chapterNumber,
+            verseNumber = verseNumber,
+            pageNumber = pageNumber,
+            note = note,
+            tags = tags.joinToString(","),
+            createdAt = System.currentTimeMillis()
+        )
 
         getBookmarkById(bookmarkId.toHexString())!!
     }
 
     override suspend fun updateBookmarkNote(id: String, note: String) = withContext(Dispatchers.IO) {
         val objectId = ObjectId(id)
-        realm.write {
-            val entity = query<BookmarkEntity>("id == $0", objectId)
-                .first()
-                .find()
-
-            entity?.note = note
-        }
+        bookmarkDao.updateNote(objectId, note)
     }
 
     override suspend fun updateBookmarkTags(id: String, tags: List<String>) = withContext(Dispatchers.IO) {
         val objectId = ObjectId(id)
-        realm.write {
-            val entity = query<BookmarkEntity>("id == $0", objectId)
-                .first()
-                .find()
-
-            entity?.tags = tags.joinToString(",")
-        }
+        bookmarkDao.updateTags(objectId, tags.joinToString(","))
     }
 
     override suspend fun deleteBookmark(id: String): Unit = withContext(Dispatchers.IO) {
         val objectId = ObjectId(id)
-        realm.write {
-            val entity = query<BookmarkEntity>("id == $0", objectId)
-                .first()
-                .find()
-
-            entity?.let { delete(it) }
-        }
+        bookmarkDao.delete(objectId)
     }
 
     override suspend fun deleteBookmarkForVerse(chapterNumber: Int, verseNumber: Int): Unit = withContext(Dispatchers.IO) {
-        realm.write {
-            val entity = query<BookmarkEntity>("chapterNumber == $0 AND verseNumber == $1", chapterNumber, verseNumber)
-                .first()
-                .find()
-
-            entity?.let { delete(it) }
-        }
+        bookmarkDao.deleteForVerse(chapterNumber, verseNumber)
     }
 
     override suspend fun deleteAllBookmarks() = withContext(Dispatchers.IO) {
-        realm.write {
-            val bookmarks = query<BookmarkEntity>().find()
-            delete(bookmarks)
-        }
+        bookmarkDao.deleteAll()
     }
 
     override suspend fun isVerseBookmarked(chapterNumber: Int, verseNumber: Int): Boolean = withContext(Dispatchers.IO) {
-        realm.query<BookmarkEntity>("chapterNumber == $0 AND verseNumber == $1", chapterNumber, verseNumber)
-            .count()
-            .find() > 0
+        bookmarkDao.isVerseBookmarked(chapterNumber, verseNumber)
     }
 
     override suspend fun searchBookmarks(query: String): List<Bookmark> = withContext(Dispatchers.IO) {
-        val lowerQuery = query.lowercase()
-        realm.query<BookmarkEntity>()
-            .find()
-            .filter { bookmark ->
-                bookmark.note.lowercase().contains(lowerQuery) ||
-                bookmark.tags.lowercase().contains(lowerQuery)
-            }
-            .map { it.toDomain() }
+        bookmarkDao.search(query).map { it.toDomain() }
     }
 
     private fun BookmarkEntity.toDomain(): Bookmark {

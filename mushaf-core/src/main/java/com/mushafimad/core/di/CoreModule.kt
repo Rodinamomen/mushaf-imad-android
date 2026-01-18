@@ -1,29 +1,68 @@
 package com.mushafimad.core.di
 
+import android.content.Context
+import android.content.SharedPreferences
+import com.mushafimad.core.data.audio.AyahTimingService
+import com.mushafimad.core.data.audio.MediaSessionManager
+import com.mushafimad.core.data.audio.ReciterService
+import com.mushafimad.core.data.cache.ChaptersDataCache
+import com.mushafimad.core.data.cache.QuranDataCacheService
+import com.mushafimad.core.data.local.dao.BookmarkDao
+import com.mushafimad.core.data.local.dao.ReadingHistoryDao
+import com.mushafimad.core.data.local.dao.RealmBookmarkDao
+import com.mushafimad.core.data.local.dao.RealmReadingHistoryDao
+import com.mushafimad.core.data.local.dao.RealmSearchHistoryDao
+import com.mushafimad.core.data.local.dao.SearchHistoryDao
 import com.mushafimad.core.data.repository.*
 import com.mushafimad.core.domain.repository.*
-import com.mushafimad.core.internal.ServiceRegistry
 import org.koin.dsl.module
 
 /**
  * Koin module for core library dependencies
- * Provides repositories as singletons with constructor injection
+ * Provides all services and repositories as singletons with proper dependency injection
  *
  * Architecture:
- * - Koin manages repository lifecycle and dependency injection
- * - ServiceRegistry provides low-level infrastructure services (Realm, Context, Audio services)
- * - Repositories are simple classes with constructor injection
+ * - Koin manages ALL dependencies (no ServiceRegistry)
+ * - Infrastructure services (Realm, cache, audio) created directly
+ * - Repositories receive dependencies via constructor injection
+ * - Testable: all services can be swapped with fakes/mocks
  */
 val coreModule = module {
-    // Infrastructure services from ServiceRegistry
-    single { ServiceRegistry.getContext() }
-    single { ServiceRegistry.getRealmService() }
-    single { ServiceRegistry.getSharedPreferences() }
-    single { ServiceRegistry.getChaptersCache() }
-    single { ServiceRegistry.getQuranCacheService() }
-    single { ServiceRegistry.getReciterService() }
-    single { ServiceRegistry.getAyahTimingService() }
-    single { ServiceRegistry.getMediaSessionManager() }
+    // Infrastructure services - created directly by Koin
+
+    // Context (provided by ContentProvider during initialization)
+    // No definition needed here - will be provided via androidContext()
+
+    // SharedPreferences
+    single<SharedPreferences> {
+        get<Context>().getSharedPreferences("mushaf_preferences", Context.MODE_PRIVATE)
+    }
+
+    // Realm service (useInMemory = false for production, can be overridden in tests)
+    single<RealmService> {
+        DefaultRealmService(
+            context = get(),
+            useInMemory = false
+        )
+    }
+
+    // Cache services
+    single { ChaptersDataCache(get()) }
+    single { QuranDataCacheService(get()) }
+
+    // Audio services
+    single { AyahTimingService(get()) }
+    single { ReciterService(get(), get(), get()) }
+    single {
+        MediaSessionManager(get()).also {
+            it.initialize()
+        }
+    }
+
+    // Data Access Objects (DAOs) - abstraction layer for database operations
+    single<BookmarkDao> { RealmBookmarkDao(get()) }
+    single<ReadingHistoryDao> { RealmReadingHistoryDao(get()) }
+    single<SearchHistoryDao> { RealmSearchHistoryDao(get()) }
 
     // Quran Data Repositories
     single<QuranRepository> {
@@ -52,15 +91,15 @@ val coreModule = module {
         )
     }
 
-    // User Data Repositories
+    // User Data Repositories (fully using DAO abstraction - no direct Realm access)
     single<BookmarkRepository> {
-        DefaultBookmarkRepository(get())
+        DefaultBookmarkRepository(get())  // Injects BookmarkDao
     }
     single<ReadingHistoryRepository> {
-        DefaultReadingHistoryRepository(get())
+        DefaultReadingHistoryRepository(get())  // Injects ReadingHistoryDao
     }
     single<SearchHistoryRepository> {
-        DefaultSearchHistoryRepository(get())
+        DefaultSearchHistoryRepository(get())  // Injects SearchHistoryDao
     }
 
     // Audio Repository

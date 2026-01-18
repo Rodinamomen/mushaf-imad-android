@@ -1,5 +1,6 @@
 package com.mushafimad.core.data.repository
 
+import com.mushafimad.core.data.local.dao.ReadingHistoryDao
 import com.mushafimad.core.data.local.entities.LastReadPositionEntity
 import com.mushafimad.core.data.local.entities.ReadingHistoryEntity
 import com.mushafimad.core.domain.models.LastReadPosition
@@ -7,33 +8,27 @@ import com.mushafimad.core.domain.models.MushafType
 import com.mushafimad.core.domain.models.ReadingHistory
 import com.mushafimad.core.domain.models.ReadingStats
 import com.mushafimad.core.domain.repository.ReadingHistoryRepository
-import io.realm.kotlin.Realm
-import io.realm.kotlin.ext.query
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
+/**
+ * Default implementation of ReadingHistoryRepository using ReadingHistoryDao
+ * Fully testable - DAO can be swapped with fake implementation
+ */
 internal class DefaultReadingHistoryRepository (
-    private val realmService: RealmService
+    private val readingHistoryDao: ReadingHistoryDao
 ) : ReadingHistoryRepository {
 
-
-    private val realm: Realm
-        get() = realmService.getRealm()
-
     override fun getLastReadPositionFlow(mushafType: MushafType): Flow<LastReadPosition?> {
-        return realm.query<LastReadPositionEntity>("mushafType == $0", mushafType.name)
-            .asFlow()
-            .map { results -> results.list.firstOrNull()?.toDomain() }
+        return readingHistoryDao.getLastReadPositionFlow(mushafType.name)
+            .map { entity -> entity?.toDomain() }
     }
 
     override suspend fun getLastReadPosition(mushafType: MushafType): LastReadPosition? = withContext(Dispatchers.IO) {
-        realm.query<LastReadPositionEntity>("mushafType == $0", mushafType.name)
-            .first()
-            .find()
-            ?.toDomain()
+        readingHistoryDao.getLastReadPosition(mushafType.name)?.toDomain()
     }
 
     override suspend fun updateLastReadPosition(
@@ -43,30 +38,13 @@ internal class DefaultReadingHistoryRepository (
         pageNumber: Int,
         scrollPosition: Float
     ): Unit = withContext(Dispatchers.IO) {
-        realm.write {
-            val existing = query<LastReadPositionEntity>("mushafType == $0", mushafType.name)
-                .first()
-                .find()
-
-            if (existing != null) {
-                existing.apply {
-                    this.chapterNumber = chapterNumber
-                    this.verseNumber = verseNumber
-                    this.pageNumber = pageNumber
-                    this.scrollPosition = scrollPosition
-                    this.lastReadAt = System.currentTimeMillis()
-                }
-            } else {
-                copyToRealm(LastReadPositionEntity().apply {
-                    this.mushafType = mushafType.name
-                    this.chapterNumber = chapterNumber
-                    this.verseNumber = verseNumber
-                    this.pageNumber = pageNumber
-                    this.scrollPosition = scrollPosition
-                    this.lastReadAt = System.currentTimeMillis()
-                })
-            }
-        }
+        readingHistoryDao.updateLastReadPosition(
+            mushafType = mushafType.name,
+            pageNumber = pageNumber,
+            chapterNumber = chapterNumber,
+            verseNumber = verseNumber,
+            timestamp = System.currentTimeMillis()
+        )
     }
 
     override suspend fun recordReadingSession(
@@ -76,59 +54,40 @@ internal class DefaultReadingHistoryRepository (
         durationSeconds: Int,
         mushafType: MushafType
     ): Unit = withContext(Dispatchers.IO) {
-        realm.write {
-            copyToRealm(ReadingHistoryEntity().apply {
-                this.chapterNumber = chapterNumber
-                this.verseNumber = verseNumber
-                this.pageNumber = pageNumber
-                this.timestamp = System.currentTimeMillis()
-                this.durationSeconds = durationSeconds
-                this.mushafType = mushafType.name
-            })
-        }
+        readingHistoryDao.insertHistory(
+            chapterNumber = chapterNumber,
+            pageNumber = pageNumber,
+            timestamp = System.currentTimeMillis(),
+            durationSeconds = durationSeconds
+        )
     }
 
     override suspend fun getRecentHistory(limit: Int): List<ReadingHistory> = withContext(Dispatchers.IO) {
-        realm.query<ReadingHistoryEntity>()
-            .sort("timestamp", io.realm.kotlin.query.Sort.DESCENDING)
-            .limit(limit)
-            .find()
-            .map { it.toDomain() }
+        readingHistoryDao.getRecentHistory(limit).map { it.toDomain() }
     }
 
     override suspend fun getHistoryForDateRange(startTimestamp: Long, endTimestamp: Long): List<ReadingHistory> = withContext(Dispatchers.IO) {
-        realm.query<ReadingHistoryEntity>("timestamp >= $0 AND timestamp <= $1", startTimestamp, endTimestamp)
-            .sort("timestamp", io.realm.kotlin.query.Sort.DESCENDING)
-            .find()
+        readingHistoryDao.getHistoryForDateRange(startTimestamp, endTimestamp)
             .map { it.toDomain() }
     }
 
     override suspend fun getHistoryForChapter(chapterNumber: Int): List<ReadingHistory> = withContext(Dispatchers.IO) {
-        realm.query<ReadingHistoryEntity>("chapterNumber == $0", chapterNumber)
-            .sort("timestamp", io.realm.kotlin.query.Sort.DESCENDING)
-            .find()
-            .map { it.toDomain() }
+        readingHistoryDao.getHistoryForChapter(chapterNumber).map { it.toDomain() }
     }
 
     override suspend fun deleteHistoryOlderThan(timestamp: Long) = withContext(Dispatchers.IO) {
-        realm.write {
-            val oldHistory = query<ReadingHistoryEntity>("timestamp < $0", timestamp).find()
-            delete(oldHistory)
-        }
+        readingHistoryDao.deleteHistoryOlderThan(timestamp)
     }
 
     override suspend fun deleteAllHistory() = withContext(Dispatchers.IO) {
-        realm.write {
-            val history = query<ReadingHistoryEntity>().find()
-            delete(history)
-        }
+        readingHistoryDao.deleteAllHistory()
     }
 
     override suspend fun getReadingStats(startTimestamp: Long?, endTimestamp: Long?): ReadingStats = withContext(Dispatchers.IO) {
         val history = if (startTimestamp != null && endTimestamp != null) {
-            realm.query<ReadingHistoryEntity>("timestamp >= $0 AND timestamp <= $1", startTimestamp, endTimestamp).find()
+            readingHistoryDao.getHistoryForDateRange(startTimestamp, endTimestamp)
         } else {
-            realm.query<ReadingHistoryEntity>().find()
+            readingHistoryDao.getAllHistory()
         }
 
         val totalTime = history.sumOf { it.durationSeconds.toLong() }
@@ -137,8 +96,8 @@ internal class DefaultReadingHistoryRepository (
         val verses = history.map { "${it.chapterNumber}:${it.verseNumber}" }.distinct().size
         val mostRead = history.groupBy { it.chapterNumber }
             .maxByOrNull { it.value.size }?.key
-        val currentStreak = calculateCurrentStreak(history.toList())
-        val longestStreak = calculateLongestStreak(history.toList())
+        val currentStreak = calculateCurrentStreak(history)
+        val longestStreak = calculateLongestStreak(history)
         val avgDaily = if (history.isNotEmpty()) {
             val days = history.map { TimeUnit.MILLISECONDS.toDays(it.timestamp) }.distinct().size
             ((totalTime / 60) / days.coerceAtLeast(1)).toInt()
@@ -157,22 +116,18 @@ internal class DefaultReadingHistoryRepository (
     }
 
     override suspend fun getTotalReadingTime(): Long = withContext(Dispatchers.IO) {
-        realm.query<ReadingHistoryEntity>().find().sumOf { it.durationSeconds.toLong() }
+        readingHistoryDao.getAllHistory().sumOf { it.durationSeconds.toLong() }
     }
 
     override suspend fun getReadChapters(): List<Int> = withContext(Dispatchers.IO) {
-        realm.query<ReadingHistoryEntity>()
-            .find()
+        readingHistoryDao.getAllHistory()
             .map { it.chapterNumber }
             .distinct()
             .sorted()
     }
 
     override suspend fun getCurrentStreak(): Int = withContext(Dispatchers.IO) {
-        val history = realm.query<ReadingHistoryEntity>()
-            .sort("timestamp", io.realm.kotlin.query.Sort.DESCENDING)
-            .find()
-            .toList()
+        val history = readingHistoryDao.getRecentHistory(1000)  // Get recent entries for streak calculation
         calculateCurrentStreak(history)
     }
 

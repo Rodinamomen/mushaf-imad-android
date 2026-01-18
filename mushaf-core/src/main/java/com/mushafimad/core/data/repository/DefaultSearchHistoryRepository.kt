@@ -1,12 +1,11 @@
 package com.mushafimad.core.data.repository
 
+import com.mushafimad.core.data.local.dao.SearchHistoryDao
 import com.mushafimad.core.data.local.entities.SearchHistoryEntity
 import com.mushafimad.core.domain.models.SearchHistoryEntry
 import com.mushafimad.core.domain.models.SearchSuggestion
 import com.mushafimad.core.domain.models.SearchType
 import com.mushafimad.core.domain.repository.SearchHistoryRepository
-import io.realm.kotlin.Realm
-import io.realm.kotlin.ext.query
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -14,33 +13,20 @@ import kotlinx.coroutines.withContext
 import org.mongodb.kbson.ObjectId
 
 /**
- * Default implementation of SearchHistoryRepository using Realm
- * Internal implementation - not exposed in public API
+ * Default implementation of SearchHistoryRepository using SearchHistoryDao
+ * Fully testable - DAO can be swapped with fake implementation
  */
 internal class DefaultSearchHistoryRepository (
-    private val realmService: RealmService
+    private val searchHistoryDao: SearchHistoryDao
 ) : SearchHistoryRepository {
 
-
-    private val realm: Realm
-        get() = realmService.getRealm()
-
     override fun getRecentSearchesFlow(limit: Int): Flow<List<SearchHistoryEntry>> {
-        return realm.query<SearchHistoryEntity>()
-            .sort("timestamp", io.realm.kotlin.query.Sort.DESCENDING)
-            .limit(limit)
-            .asFlow()
-            .map { results ->
-                results.list.map { it.toDomain() }
-            }
+        return searchHistoryDao.getRecentSearchesFlow(limit)
+            .map { entities -> entities.map { it.toDomain() } }
     }
 
     override suspend fun getRecentSearches(limit: Int): List<SearchHistoryEntry> = withContext(Dispatchers.IO) {
-        realm.query<SearchHistoryEntity>()
-            .sort("timestamp", io.realm.kotlin.query.Sort.DESCENDING)
-            .limit(limit)
-            .find()
-            .map { it.toDomain() }
+        searchHistoryDao.getRecentSearches(limit).map { it.toDomain() }
     }
 
     override suspend fun recordSearch(
@@ -51,14 +37,12 @@ internal class DefaultSearchHistoryRepository (
         // Don't record empty queries
         if (query.isBlank()) return@withContext
 
-        realm.write {
-            copyToRealm(SearchHistoryEntity().apply {
-                this.query = query.trim()
-                this.timestamp = System.currentTimeMillis()
-                this.resultCount = resultCount
-                this.searchType = searchType.name
-            })
-        }
+        searchHistoryDao.insertSearch(
+            query = query.trim(),
+            resultCount = resultCount,
+            searchType = searchType.name,
+            timestamp = System.currentTimeMillis()
+        )
 
         // Clean up old history (keep last 100 entries)
         cleanupOldHistory(limit = 100)
@@ -69,11 +53,9 @@ internal class DefaultSearchHistoryRepository (
         limit: Int
     ): List<SearchSuggestion> = withContext(Dispatchers.IO) {
         val searches = if (prefix != null && prefix.isNotBlank()) {
-            realm.query<SearchHistoryEntity>()
-                .find()
-                .filter { it.query.startsWith(prefix, ignoreCase = true) }
+            searchHistoryDao.getByPrefix(prefix)
         } else {
-            realm.query<SearchHistoryEntity>().find()
+            searchHistoryDao.getAllSearches()
         }
 
         // Group by query and count frequency
@@ -92,7 +74,7 @@ internal class DefaultSearchHistoryRepository (
     }
 
     override suspend fun getPopularSearches(limit: Int): List<SearchSuggestion> = withContext(Dispatchers.IO) {
-        val searches = realm.query<SearchHistoryEntity>().find()
+        val searches = searchHistoryDao.getAllSearches()
 
         searches
             .groupBy { it.query.lowercase() }
@@ -114,54 +96,26 @@ internal class DefaultSearchHistoryRepository (
             return@withContext
         }
 
-        realm.write {
-            val entity = query<SearchHistoryEntity>("id == $0", objectId)
-                .first()
-                .find()
-
-            entity?.let { delete(it) }
-        }
+        searchHistoryDao.delete(objectId)
     }
 
     override suspend fun deleteSearchesOlderThan(timestamp: Long): Unit = withContext(Dispatchers.IO) {
-        realm.write {
-            val oldSearches = query<SearchHistoryEntity>("timestamp < $0", timestamp).find()
-            delete(oldSearches)
-        }
+        searchHistoryDao.deleteOlderThan(timestamp)
     }
 
     override suspend fun clearSearchHistory(): Unit = withContext(Dispatchers.IO) {
-        realm.write {
-            val allSearches = query<SearchHistoryEntity>().find()
-            delete(allSearches)
-        }
+        searchHistoryDao.deleteAll()
     }
 
     override suspend fun getSearchesByType(searchType: SearchType, limit: Int): List<SearchHistoryEntry> = withContext(Dispatchers.IO) {
-        realm.query<SearchHistoryEntity>("searchType == $0", searchType.name)
-            .sort("timestamp", io.realm.kotlin.query.Sort.DESCENDING)
-            .limit(limit)
-            .find()
-            .map { it.toDomain() }
+        searchHistoryDao.getByType(searchType.name, limit).map { it.toDomain() }
     }
 
     /**
      * Clean up old history entries, keeping only the most recent ones
      */
     private suspend fun cleanupOldHistory(limit: Int) = withContext(Dispatchers.IO) {
-        val count = realm.query<SearchHistoryEntity>().count().find()
-        if (count > limit) {
-            realm.write {
-                val allEntries = query<SearchHistoryEntity>()
-                    .sort("timestamp", io.realm.kotlin.query.Sort.DESCENDING)
-                    .find()
-
-                // Delete entries beyond the limit
-                allEntries.drop(limit).forEach { entry ->
-                    delete(entry)
-                }
-            }
-        }
+        searchHistoryDao.removeOldestEntries(limit)
     }
 
     private fun SearchHistoryEntity.toDomain() = SearchHistoryEntry(

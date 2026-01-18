@@ -18,9 +18,13 @@ import java.io.File
 /**
  * Implementation of RealmService that provides access to the Quran database
  * Internal API - not exposed to library consumers
+ *
+ * @param context Application context
+ * @param useInMemory If true, uses in-memory Realm for testing (no file I/O). Default is false.
  */
 internal class DefaultRealmService(
-    private val context: Context
+    private val context: Context,
+    private val useInMemory: Boolean = false
 ) : RealmService {
 
     private var realm: Realm? = null
@@ -64,82 +68,97 @@ internal class DefaultRealmService(
         // Skip if already initialized
         if (realm != null) return
 
-        println("RealmService: Initializing Realm...")
+        println("RealmService: Initializing Realm (useInMemory=$useInMemory)...")
 
-        // Get the bundled Realm file from assets
-        val assetManager = context.assets
-        val realmInputStream = try {
-            assetManager.open(REALM_FILE_NAME)
-        } catch (e: Exception) {
-            println("RealmService: ERROR - Could not find $REALM_FILE_NAME in assets")
-            throw IllegalStateException("Could not find $REALM_FILE_NAME in assets", e)
-        }
-
-        // Get app's internal storage directory
-        val appFilesDir = context.filesDir
-        val realmFile = File(appFilesDir, REALM_FILE_NAME)
-
-        println("RealmService: Realm file path: ${realmFile.absolutePath}")
-        println("RealmService: Realm file exists: ${realmFile.exists()}, size: ${if (realmFile.exists()) realmFile.length() else 0} bytes")
-
-        // TEMPORARY: Force fresh copy from assets to fix schema mismatch
-        // Delete existing file if it exists
-        if (realmFile.exists()) {
-            println("RealmService: Deleting existing realm file to force fresh copy...")
-            realmFile.delete()
-            // Also delete lock files
-            File(appFilesDir, "$REALM_FILE_NAME.lock").delete()
-            File(appFilesDir, "$REALM_FILE_NAME.management").delete()
-        }
-
-        // Copy the bundled Realm file from assets
-        println("RealmService: Copying realm file from assets...")
-        realmInputStream.use { input ->
-            realmFile.outputStream().use { output ->
-                input.copyTo(output)
-            }
-        }
-        println("RealmService: Copied realm file, new size: ${realmFile.length()} bytes")
-
-        // Configure Realm
-        val config = RealmConfiguration.Builder(
-            schema = setOf(
-                // Core Quran entities
-                ChapterEntity::class,
-                VerseEntity::class,
-                PageEntity::class,
-                PartEntity::class,
-                QuarterEntity::class,
-                VerseHighlightEntity::class,
-                VerseMarkerEntity::class,
-                PageHeaderEntity::class,
-                ChapterHeaderEntity::class,
-                QuranSectionEntity::class,
-                // User data entities (Week 7)
-                BookmarkEntity::class,
-                ReadingHistoryEntity::class,
-                LastReadPositionEntity::class,
-                // Search history entities (Week 8)
-                SearchHistoryEntity::class
-            )
+        // Define schema for all Realm configurations
+        val schema = setOf(
+            // Core Quran entities
+            ChapterEntity::class,
+            VerseEntity::class,
+            PageEntity::class,
+            PartEntity::class,
+            QuarterEntity::class,
+            VerseHighlightEntity::class,
+            VerseMarkerEntity::class,
+            PageHeaderEntity::class,
+            ChapterHeaderEntity::class,
+            QuranSectionEntity::class,
+            // User data entities
+            BookmarkEntity::class,
+            ReadingHistoryEntity::class,
+            LastReadPositionEntity::class,
+            // Search history entities
+            SearchHistoryEntity::class
         )
-            .name(REALM_FILE_NAME)
-            .schemaVersion(SCHEMA_VERSION)
-            .directory(appFilesDir.absolutePath)
-            .build()
+
+        val config = if (useInMemory) {
+            // In-memory configuration for tests - no file I/O
+            println("RealmService: Using in-memory configuration (for tests)")
+            RealmConfiguration.Builder(schema = schema)
+                .inMemory()
+                .build()
+        } else {
+            // File-based configuration for production
+            println("RealmService: Using file-based configuration (production)")
+
+            // Get the bundled Realm file from assets
+            val assetManager = context.assets
+            val realmInputStream = try {
+                assetManager.open(REALM_FILE_NAME)
+            } catch (e: Exception) {
+                println("RealmService: ERROR - Could not find $REALM_FILE_NAME in assets")
+                throw IllegalStateException("Could not find $REALM_FILE_NAME in assets", e)
+            }
+
+            // Get app's internal storage directory
+            val appFilesDir = context.filesDir
+            val realmFile = File(appFilesDir, REALM_FILE_NAME)
+
+            println("RealmService: Realm file path: ${realmFile.absolutePath}")
+            println("RealmService: Realm file exists: ${realmFile.exists()}, size: ${if (realmFile.exists()) realmFile.length() else 0} bytes")
+
+            // TEMPORARY: Force fresh copy from assets to fix schema mismatch
+            // Delete existing file if it exists
+            if (realmFile.exists()) {
+                println("RealmService: Deleting existing realm file to force fresh copy...")
+                realmFile.delete()
+                // Also delete lock files
+                File(appFilesDir, "$REALM_FILE_NAME.lock").delete()
+                File(appFilesDir, "$REALM_FILE_NAME.management").delete()
+            }
+
+            // Copy the bundled Realm file from assets
+            println("RealmService: Copying realm file from assets...")
+            realmInputStream.use { input ->
+                realmFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+            println("RealmService: Copied realm file, new size: ${realmFile.length()} bytes")
+
+            RealmConfiguration.Builder(schema = schema)
+                .name(REALM_FILE_NAME)
+                .schemaVersion(SCHEMA_VERSION)
+                .directory(appFilesDir.absolutePath)
+                .build()
+        }
 
         configuration = config
         realm = Realm.open(config)
 
         println("RealmService: Realm opened successfully")
-        println("RealmService: Testing query - chapter count...")
-        try {
-            val chapterCount = realm?.query<ChapterEntity>()?.count()?.find()
-            println("RealmService: Found $chapterCount chapters in database")
-            val verseCount = realm?.query<VerseEntity>()?.count()?.find()
-            println("RealmService: Found $verseCount verses in database")
-        } catch (e: Exception) {
-            println("RealmService: ERROR querying database: ${e.message}")
+
+        if (!useInMemory) {
+            // Only test queries for file-based Realm (in-memory starts empty)
+            println("RealmService: Testing query - chapter count...")
+            try {
+                val chapterCount = realm?.query<ChapterEntity>()?.count()?.find()
+                println("RealmService: Found $chapterCount chapters in database")
+                val verseCount = realm?.query<VerseEntity>()?.count()?.find()
+                println("RealmService: Found $verseCount verses in database")
+            } catch (e: Exception) {
+                println("RealmService: ERROR querying database: ${e.message}")
+            }
         }
     }
 

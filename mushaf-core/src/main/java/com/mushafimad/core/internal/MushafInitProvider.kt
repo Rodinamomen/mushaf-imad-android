@@ -8,12 +8,16 @@ import com.mushafimad.core.MushafLibrary
 import com.mushafimad.core.di.coreModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
+import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
 
 /**
  * ContentProvider that automatically initializes the Mushaf library.
  * Runs before Application.onCreate() to ensure zero-configuration setup.
+ *
+ * Test-aware: If Koin is already started (e.g., by tests), this provider
+ * will skip initialization to allow test modules to be used instead.
  *
  * @internal This class is not part of the public API.
  */
@@ -24,10 +28,14 @@ internal class MushafInitProvider : ContentProvider() {
 
         MushafLibrary.initializeInternal(context.applicationContext)
 
-        startKoin {
-            androidLogger(Level.ERROR)
-            androidContext(context.applicationContext)
-            modules(coreModule)
+        // Check if Koin is already started (e.g., by tests)
+        // If so, skip initialization to allow test modules
+        if (GlobalContext.getOrNull() == null) {
+            startKoin {
+                androidLogger(Level.DEBUG)
+                androidContext(context.applicationContext)
+                modules(coreModule)
+            }
         }
 
         return true
