@@ -129,6 +129,54 @@ interface PreferencesRepository {
      */
     suspend fun setRepeatMode(enabled: Boolean)
 
+    /**
+     * Observe last played audio chapter
+     */
+    fun getLastAudioChapterFlow(): Flow<Int?>
+
+    /**
+     * Get last played audio chapter
+     */
+    suspend fun getLastAudioChapter(): Int?
+
+    /**
+     * Set last played audio chapter
+     * @param chapterNumber Chapter number (1-114), or null to clear
+     */
+    suspend fun setLastAudioChapter(chapterNumber: Int?)
+
+    /**
+     * Observe last played audio verse
+     */
+    fun getLastAudioVerseFlow(): Flow<Int?>
+
+    /**
+     * Get last played audio verse
+     */
+    suspend fun getLastAudioVerse(): Int?
+
+    /**
+     * Set last played audio verse
+     * @param verseNumber Verse number, or null to clear
+     */
+    suspend fun setLastAudioVerse(verseNumber: Int?)
+
+    /**
+     * Observe last audio playback position in milliseconds
+     */
+    fun getLastAudioPositionMsFlow(): Flow<Long>
+
+    /**
+     * Get last audio playback position in milliseconds
+     */
+    suspend fun getLastAudioPositionMs(): Long
+
+    /**
+     * Set last audio playback position
+     * @param positionMs Position in milliseconds
+     */
+    suspend fun setLastAudioPositionMs(positionMs: Long)
+
     // ========== Theme Preferences ==========
 
     /**

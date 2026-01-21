@@ -41,6 +41,9 @@ internal class DefaultPreferencesRepository (
         private val SELECTED_RECITER_ID_KEY = intPreferencesKey("selected_reciter_id")
         private val PLAYBACK_SPEED_KEY = floatPreferencesKey("playback_speed")
         private val REPEAT_MODE_KEY = booleanPreferencesKey("repeat_mode")
+        private val LAST_AUDIO_CHAPTER_KEY = intPreferencesKey("last_audio_chapter")
+        private val LAST_AUDIO_VERSE_KEY = intPreferencesKey("last_audio_verse")
+        private val LAST_AUDIO_POSITION_MS_KEY = longPreferencesKey("last_audio_position_ms")
 
         // Theme preferences
         private val THEME_MODE_KEY = stringPreferencesKey("theme_mode")
@@ -178,6 +181,62 @@ internal class DefaultPreferencesRepository (
     override suspend fun setRepeatMode(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[REPEAT_MODE_KEY] = enabled
+        }
+    }
+
+    override fun getLastAudioChapterFlow(): Flow<Int?> {
+        return dataStore.data.map { preferences ->
+            preferences[LAST_AUDIO_CHAPTER_KEY]
+        }
+    }
+
+    override suspend fun getLastAudioChapter(): Int? {
+        return getLastAudioChapterFlow().first()
+    }
+
+    override suspend fun setLastAudioChapter(chapterNumber: Int?) {
+        dataStore.edit { preferences ->
+            if (chapterNumber != null) {
+                preferences[LAST_AUDIO_CHAPTER_KEY] = chapterNumber
+            } else {
+                preferences.remove(LAST_AUDIO_CHAPTER_KEY)
+            }
+        }
+    }
+
+    override fun getLastAudioVerseFlow(): Flow<Int?> {
+        return dataStore.data.map { preferences ->
+            preferences[LAST_AUDIO_VERSE_KEY]
+        }
+    }
+
+    override suspend fun getLastAudioVerse(): Int? {
+        return getLastAudioVerseFlow().first()
+    }
+
+    override suspend fun setLastAudioVerse(verseNumber: Int?) {
+        dataStore.edit { preferences ->
+            if (verseNumber != null) {
+                preferences[LAST_AUDIO_VERSE_KEY] = verseNumber
+            } else {
+                preferences.remove(LAST_AUDIO_VERSE_KEY)
+            }
+        }
+    }
+
+    override fun getLastAudioPositionMsFlow(): Flow<Long> {
+        return dataStore.data.map { preferences ->
+            preferences[LAST_AUDIO_POSITION_MS_KEY] ?: 0L
+        }
+    }
+
+    override suspend fun getLastAudioPositionMs(): Long {
+        return getLastAudioPositionMsFlow().first()
+    }
+
+    override suspend fun setLastAudioPositionMs(positionMs: Long) {
+        dataStore.edit { preferences ->
+            preferences[LAST_AUDIO_POSITION_MS_KEY] = positionMs
         }
     }
 

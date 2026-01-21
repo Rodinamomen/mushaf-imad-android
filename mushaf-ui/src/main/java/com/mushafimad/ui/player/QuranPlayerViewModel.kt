@@ -6,6 +6,7 @@ import com.mushafimad.core.MushafLibrary
 import com.mushafimad.core.data.audio.PlaybackState
 import com.mushafimad.core.domain.models.ReciterInfo
 import com.mushafimad.core.domain.repository.AudioRepository
+import com.mushafimad.core.domain.repository.PreferencesRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +23,8 @@ import kotlinx.coroutines.launch
  * Dependencies are injected via Koin DI
  */
 internal class QuranPlayerViewModel(
-    private val audioRepository: AudioRepository
+    private val audioRepository: AudioRepository,
+    private val preferencesRepository: PreferencesRepository
 ) : ViewModel() {
 
     companion object {
@@ -347,9 +349,69 @@ internal class QuranPlayerViewModel(
         return chapterNumber > 0 && currentReciterId > 0
     }
 
+    /**
+     * Save current audio playback position
+     */
+    fun saveAudioPosition() {
+        viewModelScope.launch {
+            try {
+                if (chapterNumber > 0) {
+                    preferencesRepository.setLastAudioChapter(chapterNumber)
+                    preferencesRepository.setLastAudioVerse(_currentVerseNumber.value)
+                    preferencesRepository.setLastAudioPositionMs(_currentTimeMs.value)
+                    MushafLibrary.logger.debug("Saved audio position: chapter=$chapterNumber, verse=${_currentVerseNumber.value}, position=${_currentTimeMs.value}ms")
+                }
+            } catch (e: Exception) {
+                MushafLibrary.logger.error("Failed to save audio position", e)
+            }
+        }
+    }
+
+    /**
+     * Restore last audio playback position
+     * @return true if position was restored, false otherwise
+     */
+    suspend fun restoreAudioPosition(): Boolean {
+        return try {
+            val lastChapter = preferencesRepository.getLastAudioChapter()
+            val lastVerse = preferencesRepository.getLastAudioVerse()
+            val lastPosition = preferencesRepository.getLastAudioPositionMs()
+
+            if (lastChapter != null && lastChapter > 0) {
+                MushafLibrary.logger.info("Restoring audio position: chapter=$lastChapter, verse=$lastVerse, position=${lastPosition}ms")
+                // Return true to indicate we have a saved position
+                true
+            } else {
+                false
+            }
+        } catch (e: Exception) {
+            MushafLibrary.logger.error("Failed to restore audio position", e)
+            false
+        }
+    }
+
+    /**
+     * Get last played chapter info
+     */
+    suspend fun getLastPlayedChapter(): Pair<Int, Long>? {
+        return try {
+            val lastChapter = preferencesRepository.getLastAudioChapter()
+            val lastPosition = preferencesRepository.getLastAudioPositionMs()
+            if (lastChapter != null && lastChapter > 0) {
+                Pair(lastChapter, lastPosition)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            MushafLibrary.logger.error("Failed to get last played chapter", e)
+            null
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
         stopVerseTracking()
+        saveAudioPosition()
     }
 }
 

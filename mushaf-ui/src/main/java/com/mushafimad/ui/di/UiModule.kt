@@ -31,10 +31,11 @@ val uiModule = module {
         )
     }
 
-    // Player ViewModel (1 dependency)
+    // Player ViewModel (2 dependencies)
     viewModel {
         QuranPlayerViewModel(
-            audioRepository = get()
+            audioRepository = get(),
+            preferencesRepository = get()
         )
     }
 
