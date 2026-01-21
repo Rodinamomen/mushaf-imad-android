@@ -29,7 +29,7 @@ import com.mushafimad.core.domain.models.ReciterInfo
  * @param onDismiss Callback to dismiss the dialog
  */
 @Composable
-internal fun ReciterPickerDialog(
+fun ReciterPickerDialog(
     reciters: List<ReciterInfo>,
     selectedReciter: ReciterInfo?,
     onReciterSelected: (ReciterInfo) -> Unit,
