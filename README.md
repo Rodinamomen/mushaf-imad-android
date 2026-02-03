@@ -180,8 +180,7 @@ fun SearchScreen() {
                 currentPage = verse.pageNumber
             },
             onChapterSelected = { chapter ->
-                // Handle chapter selection
-                currentPage = chapter.startPage
+                // Handle chapter selection - look up the first page for this chapter
             },
             onDismiss = {
                 // Handle dismiss
@@ -229,10 +228,9 @@ enum class ReadingTheme {
 ```kotlin
 enum class ColorSchemeType {
     DEFAULT,
-    GREEN,
-    BLUE,
-    PURPLE,
-    ORANGE
+    WARM,
+    COOL,
+    SEPIA
 }
 ```
 
@@ -251,30 +249,30 @@ enum class MushafType {
 
 ### Available Reciters (18 total)
 
-- Ibrahim Al-Akdar (إبراهيم الأخضر)
-- Ahmad Al-Ajmy (أحمد بن علي العجمي)
+- Abdul Basit Abdul Samad (عبد الباسط عبد الصمد)
+- Mohamed Siddiq Al-Minshawi (محمد صديق المنشاوي)
 - Mahmoud Khalil Al-Hussary (محمود خليل الحصري)
-- Ali Abdur-Rahman al-Huthaify (علي بن عبدالرحمن الحذيفي)
+- Mahmoud Khalil Al-Hussary - Mujawwad (محمود خليل الحصري - مجود)
+- Mishari Rashid Al-Afasy (مشاري راشد العفاسي)
+- Saad Al-Ghamdi (سعد الغامدي)
+- Maher Al-Muaiqly (ماهر المعيقلي)
+- Abdul Rahman Al-Sudais (عبد الرحمن السديس)
 - Saud Al-Shuraim (سعود الشريم)
-- Abdul Rahman Al-Sudais (عبدالرحمن السديس)
-- Bandar Baleela (بندر بليلة)
+- Ahmed ibn Ali Al-Ajmi (أحمد بن علي العجمي)
 - Yasser Al-Dosari (ياسر الدوسري)
-- Fares Abbad (فارس عباد)
-- Maher Al Mueaqly (ماهر المعيقلي)
-- Abdullah Basfar (عبدالله بصفر)
-- Nasser Al Qatami (ناصر القطامي)
+- Abdullah Basfar (عبد الله بصفر)
+- Khalifa Al-Tunaiji (خليفة الطنيجي)
+- Nasser Al-Qatami (ناصر القطامي)
+- Abdullah Al-Juhani (عبد الله الجهني)
+- Bandar Baleela (بندر بليلة)
 - Muhammad Ayyub (محمد أيوب)
-- Omar Al-Qazabri (عمر القزابري) - Warsh recitation
-- Mishari Rashid al-Afasy (مشاري العفاسي)
-- Mohammad al Tablaway (محمد جبريل)
-- Abdul Basit Abdus Samad (عبدالباسط عبدالصمد)
-- Hani Ar-Rifai (هاني الرفاعي)
+- Abdullah Al-Matroud (عبد الله المطرود)
 
 ### Audio Controls
 
 - ▶️ Play/Pause/Stop
 - ⏭️ Next/Previous verse
-- 🎚️ Playback speed (0.5x - 2.0x)
+- 🎚️ Playback speed (0.75x - 3.0x)
 - 🔁 Repeat mode
 - 🎯 Seek to specific verse
 - ✨ Real-time verse highlighting
@@ -355,7 +353,7 @@ mushaf-ui/                      # Jetpack Compose UI (depends on mushaf-core)
 ## Technology Stack
 
 - **UI:** Jetpack Compose with Material 3
-- **Database:** Realm Kotlin 2.3.0 (schema version 24)
+- **Database:** Realm Kotlin 1.16.0 (schema version 24)
 - **Audio:** Media3 (ExoPlayer) 1.5.0
 - **DI:** Koin 3.5.6 (lightweight runtime DI, no code generation)
 - **Async:** Kotlin Coroutines + Flow
@@ -368,69 +366,23 @@ mushaf-ui/                      # Jetpack Compose UI (depends on mushaf-core)
 
 ## Sample App
 
-Run the sample app to see all features in action:
+A sample app is included in the `sample/` module demonstrating all library features:
 
 ```bash
 ./gradlew :sample:installDebug
 ```
 
-The sample app demonstrates:
-
-### Quick Start
-- Chapters List
-- Read the Mushaf
-
-### Features
-- Search (verses and chapters)
-- Theme Customization
-
-### Audio
-- Mushaf with Audio Player
-- Reciter Selection
-- Playback Controls
-
-### Navigation
-- Category-based home screen
-- Proper navigation stack with back button support
-
 ---
 
-## Building the Library
-
-### Build AARs
+## Building from Source
 
 ```bash
-# Build mushaf-core module
-./gradlew :mushaf-core:assembleDebug
-
-# Build mushaf-ui module
-./gradlew :mushaf-ui:assembleDebug
-
-# Build both modules
+# Build both library modules
 ./gradlew assembleDebug -x lint
+
+# Run tests
+./gradlew testDebugUnitTest
 ```
-
-Outputs:
-- `mushaf-core/build/outputs/aar/mushaf-core-debug.aar`
-- `mushaf-ui/build/outputs/aar/mushaf-ui-debug.aar`
-
-### Run Tests
-
-```bash
-# Test mushaf-core
-./gradlew :mushaf-core:testDebugUnitTest
-
-# Test mushaf-ui
-./gradlew :mushaf-ui:testDebugUnitTest
-```
-
-### Build Sample App
-
-```bash
-./gradlew :sample:assembleDebug
-```
-
-Output: `sample/build/outputs/apk/debug/sample-debug.apk`
 
 ---
 
