@@ -5,10 +5,11 @@ A Quran reader library for Android providing high-quality Mushaf page display wi
 [![Android](https://img.shields.io/badge/Platform-Android-green.svg)](https://android.com)
 [![API](https://img.shields.io/badge/API-24%2B-brightgreen.svg)](https://android-arsenal.com/api?level=24)
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.9.25-blue.svg)](https://kotlinlang.org)
-[![Version](https://img.shields.io/badge/Version-1.0.0-blue.svg)](https://github.com/YahiaRagae/mushaf-imad-android)
+[![Version](https://img.shields.io/badge/Version-0.1-blue.svg)](https://github.com/YahiaRagae/mushaf-imad-android/releases/tag/0.1)
+[![JitPack](https://jitpack.io/v/YahiaRagae/mushaf-imad-android.svg)](https://jitpack.io/#YahiaRagae/mushaf-imad-android)
 [![Status](https://img.shields.io/badge/Status-Stable-green.svg)](https://github.com/YahiaRagae/mushaf-imad-android)
 
-> ✅ **Version 1.0.0:** The library is now feature-complete with background audio playback, modular architecture, and full production readiness.
+> ✅ **Version 0.1:** The library is now feature-complete with background audio playback, modular architecture, and full production readiness.
 
 ## Features
 
@@ -41,24 +42,35 @@ A Quran reader library for Android providing high-quality Mushaf page display wi
 
 ### 1. Add Dependencies
 
-The library is split into two modules for flexibility:
+Add the JitPack repository to your `settings.gradle.kts`:
 
-**Option A: Full library (UI + Data)**
 ```kotlin
-// In your app's build.gradle.kts
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url = uri("https://jitpack.io") }
+    }
+}
+```
+
+Then add the dependency in your app's `build.gradle.kts`:
+
+**Option A: Full library (UI + Data) — recommended**
+```kotlin
 dependencies {
-    // UI module (includes mushaf-core transitively)
-    implementation(project(":mushaf-ui"))
+    implementation("com.github.YahiaRagae.mushaf-imad-android:mushaf-ui:0.1")
 }
 ```
 
 **Option B: Data layer only (custom UI)**
 ```kotlin
 dependencies {
-    // Core module only (for custom UI implementations)
-    implementation(project(":mushaf-core"))
+    implementation("com.github.YahiaRagae.mushaf-imad-android:mushaf-core:0.1")
 }
 ```
+
+> `mushaf-ui` includes `mushaf-core` transitively — no need to add both.
 
 ### 2. Zero-Configuration Setup
 
@@ -413,7 +425,7 @@ Output: `sample/build/outputs/apk/debug/sample-debug.apk`
 
 ## Project Status
 
-**Version:** 1.0.0 (Stable)
+**Version:** 0.1 (Stable)
 **Status:** ✅ Production Ready
 
 ### ✅ Core Features
@@ -498,12 +510,10 @@ Output: `sample/build/outputs/apk/debug/sample-debug.apk`
 - Verse-by-verse audio playback
 - Download manager for offline audio
 
-### Priority 4: Library Publishing (v2.0.0)
-- API documentation (KDoc)
-- Maven Central or JitPack publishing
-- Comprehensive integration guide
-- Migration guide from v1.x
-- Release process automation
+### ✅ Library Publishing (COMPLETED)
+- ✅ JitPack publishing (v0.1)
+- ✅ Centralized versioning in gradle.properties
+- ✅ maven-publish plugin for both modules
 
 See **PLAN.md** for detailed roadmap and task breakdowns.
 
@@ -530,7 +540,7 @@ Developed with care for the Muslim community.
 
 ---
 
-**Last Updated:** January 17, 2026
-**Current Version:** v1.0.0
+**Last Updated:** February 3, 2026
+**Current Version:** v0.1
 **Status:** Stable - Production Ready
-**Next Milestone:** v1.1.0 (Testing & Stabilization)
+**Published:** [JitPack](https://jitpack.io/#YahiaRagae/mushaf-imad-android)
