@@ -425,97 +425,41 @@ Output: `sample/build/outputs/apk/debug/sample-debug.apk`
 
 ## Project Status
 
-**Version:** 0.1 (Stable)
-**Status:** ✅ Production Ready
+**Version:** 0.1
+**Status:** Published on [JitPack](https://jitpack.io/#YahiaRagae/mushaf-imad-android) — undergoing QA
 
-### ✅ Core Features
-- ✅ Page navigation (604 pages)
-- ✅ Image-based Mushaf rendering
-- ✅ Verse highlighting and selection
-- ✅ Fasel (verse number) decorations
-- ✅ Multiple reading themes and color schemes
-- ✅ Search functionality (verses and chapters)
-- ✅ Reading position persistence
-- ✅ RTL layout support
-
-### ✅ Audio Features
-- ✅ Background audio playback (MediaSessionService)
-- ✅ Lock screen controls
-- ✅ Notification playback controls
-- ✅ 18 reciters with high-quality audio
-- ✅ Real-time verse highlighting during audio
-- ✅ Reciter selection
-- ✅ Playback controls (play/pause, seek, speed, repeat)
-- ✅ Bluetooth headset controls
-- ✅ Android Auto integration ready
-
-### ✅ Architecture
-- ✅ Modular design (mushaf-core + mushaf-ui)
-- ✅ Clean Architecture with Koin DI
-- ✅ ContentProvider auto-initialization (zero-config)
-- ✅ Jetpack Compose UI
-- ✅ Sample app demonstrating all features
-
-### Known Limitations
-- Audio playback tested on Android 7.0+ devices
-- Android 16 KB alignment warning (Realm library compatibility)
-- Some deprecation warnings for Material icons (non-blocking)
+### Completed Features
+- Page navigation (604 pages) with image-based Mushaf rendering
+- Verse highlighting, selection, and fasel decorations
+- Multiple reading themes and color schemes
+- Search functionality (verses and chapters)
+- Reading position and history persistence
+- Preferences management (mushaf type, font size, theme, audio settings)
+- Background audio playback with lock screen and notification controls
+- 18 reciters with real-time verse highlighting
+- Playback controls (play/pause, seek, speed, repeat)
+- Reciter selection dialog (public API)
+- Core data access (chapters, verses, pages, juz, hizb)
+- Data export/import (JSON)
+- Zero-configuration auto-initialization via ContentProvider
+- JitPack publishing
 
 ---
 
-## Roadmap
+## QA Testing
 
-### ✅ Phase 7: Background Audio Playback (COMPLETED)
-- ✅ Implemented MediaSessionService for background playback
-- ✅ Added lock screen playback controls
-- ✅ Added notification with playback controls
-- ✅ Support for Bluetooth headset controls
-- ✅ Added required Android permissions
-- ✅ Tested on Android 7.0+ devices
+The library is currently undergoing QA validation. Test cases are tracked as [GitHub Issues](https://github.com/YahiaRagae/mushaf-imad-android/issues?q=label%3AQA).
 
-### ✅ Phase 8: Library Modularization (COMPLETED)
-- ✅ Split into `mushaf-core` (data layer) and `mushaf-ui` (UI components)
-- ✅ Enabled developers to use data layer with custom UI
-- ✅ Clean migration with package renaming
-- ✅ Version 1.0.0 released
-
-### ✅ Phase 9: Dependency Injection Migration (COMPLETED)
-- ✅ Removed Hilt dependency (no framework requirement)
-- ✅ Implemented Koin for lightweight DI
-- ✅ ContentProvider auto-initialization (zero-config)
-- ✅ Dual ContentProvider pattern (core + UI modules)
-- ✅ Cleaned up unused code and comments
-- ✅ Removed experimental code with invalid package names
-
-### Priority 1: Code Quality & Linting (v1.1.0)
-- Add ktlint for automated code formatting
-- Configure pre-commit hooks
-- Fix remaining deprecation warnings
-- Improve code documentation
-
-### Priority 2: Testing & Stabilization (v1.1.0)
-- Test audio playback on more physical devices
-- Verify all 18 reciters' audio URLs
-- Test on different Android versions (API 24-35)
-- Performance optimization
-- Memory leak detection
-- Fix Android 16 KB alignment warning
-- Fix Material icon deprecation warnings
-
-### Priority 3: Missing Features (v1.2.0 - v1.5.0)
-- Bookmarks system
-- Translations support
-- Tafsir (commentary) integration
-- Reading history
-- Verse-by-verse audio playback
-- Download manager for offline audio
-
-### ✅ Library Publishing (COMPLETED)
-- ✅ JitPack publishing (v0.1)
-- ✅ Centralized versioning in gradle.properties
-- ✅ maven-publish plugin for both modules
-
-See **PLAN.md** for detailed roadmap and task breakdowns.
+| # | Area | Module |
+|---|------|--------|
+| QA-1 | Library Initialization & Repository Access | `mushaf-core` |
+| QA-2 | MushafView Composable Integration | `mushaf-ui` |
+| QA-3 | QuranPlayerView Composable Integration | `mushaf-ui` |
+| QA-4 | SearchView Composable Integration | `mushaf-ui` |
+| QA-5 | ReciterPickerDialog Composable Integration | `mushaf-ui` |
+| QA-6 | Core Data Repositories (Chapters, Verses, Pages, Quran) | `mushaf-core` |
+| QA-7 | ReadingHistoryRepository & PreferencesRepository API | `mushaf-core` |
+| QA-8 | AudioRepository API & Background Playback | `mushaf-core` |
 
 ---
 
