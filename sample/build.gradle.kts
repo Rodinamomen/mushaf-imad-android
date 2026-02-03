@@ -11,8 +11,8 @@ android {
         applicationId = "com.mushafimad.sampleapp"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = property("VERSION_CODE").toString().toInt()
+        versionName = property("VERSION_NAME").toString()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

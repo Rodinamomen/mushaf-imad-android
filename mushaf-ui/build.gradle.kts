@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    `maven-publish`
 }
 
 android {
@@ -14,9 +15,8 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
 
-        // Version info for v1.0.0
-        buildConfigField("String", "VERSION_NAME", "\"1.0.0\"")
-        buildConfigField("int", "VERSION_CODE", "1")
+        buildConfigField("String", "VERSION_NAME", "\"${property("VERSION_NAME")}\"")
+        buildConfigField("int", "VERSION_CODE", "${property("VERSION_CODE")}")
     }
 
     buildTypes {
@@ -108,4 +108,17 @@ dependencies {
     androidTestImplementation(composeBom)
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("release") {
+                from(components["release"])
+                groupId = property("GROUP").toString()
+                artifactId = "mushaf-ui"
+                version = property("VERSION_NAME").toString()
+            }
+        }
+    }
 }
