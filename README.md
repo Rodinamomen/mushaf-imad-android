@@ -288,46 +288,57 @@ The library follows Clean Architecture principles with modular design:
 ### Module Structure
 
 ```
-mushaf-core/                    # Headless data layer
-├── data/                       # Data layer implementation
-│   ├── audio/                  # Audio playback (Media3 ExoPlayer)
-│   │   ├── AudioPlaybackService.kt    # Background playback service
+mushaf-core/                    # Headless data layer (no Compose)
+├── data/
+│   ├── audio/
+│   │   ├── AudioPlaybackService.kt    # Background playback (MediaSessionService)
+│   │   ├── AyahTimingService.kt       # Verse timing for audio sync
 │   │   ├── MediaSessionManager.kt     # MediaSession controller
-│   │   └── ReciterDataProvider.kt     # Reciter information
-│   ├── local/                  # Local database (Realm)
-│   │   ├── entities/           # Realm entities
-│   │   └── dao/                # Data access objects
-│   ├── repository/             # Repository implementations
-│   └── cache/                  # Caching services
-│
-├── domain/                     # Domain layer (public API)
-│   ├── models/                 # Domain models
-│   └── repository/             # Repository interfaces
-│
-├── di/                         # Dependency injection (Koin)
-│   └── CoreModule.kt           # Koin module with direct injection
-│                               # Manages all repository singletons
+│   │   ├── ReciterDataProvider.kt     # Reciter metadata
+│   │   └── ReciterService.kt         # Reciter management
+│   ├── local/
+│   │   ├── entities/                  # Realm entities
+│   │   └── dao/                       # Data access objects
+│   ├── repository/                    # Repository implementations (Default*)
+│   └── cache/                         # Caching services
+├── domain/
+│   ├── models/                        # Public domain models
+│   └── repository/                    # Public repository interfaces
+├── di/
+│   └── CoreModule.kt                 # Koin singletons
 └── internal/
-    └── MushafInitProvider.kt   # ContentProvider for auto-init
+    └── MushafInitProvider.kt          # ContentProvider auto-init
 
-mushaf-ui/                      # UI components (Jetpack Compose)
-├── mushaf/                     # Mushaf reader components
-│   ├── MushafView.kt          # Main Mushaf composable
-│   ├── MushafViewModel.kt     # Mushaf state management
-│   └── QuranPageView.kt       # Page rendering
-├── player/                     # Audio player components
-│   ├── QuranPlayerView.kt     # Player UI composable
-│   └── QuranPlayerViewModel.kt # Player state management
-├── search/                     # Search components
-│   ├── SearchView.kt          # Search UI composable
-│   └── SearchViewModel.kt     # Search state management
-├── theme/                      # Theming
-│   ├── ReadingTheme.kt        # Reading themes
-│   └── ColorScheme.kt         # Color schemes
-├── di/                         # UI DI (Koin)
-│   └── UiModule.kt            # Koin module for ViewModels
+mushaf-ui/                      # Jetpack Compose UI (depends on mushaf-core)
+├── mushaf/
+│   ├── MushafView.kt                 # Main Mushaf composable
+│   ├── MushafWithPlayerView.kt       # Mushaf + integrated audio player
+│   ├── MushafViewModel.kt            # Mushaf state management
+│   ├── QuranPageView.kt              # Page rendering
+│   ├── QuranLineImageView.kt         # Line image rendering
+│   └── VerseFasel.kt                 # Verse number decorations
+├── player/
+│   ├── QuranPlayerView.kt            # Audio player composable
+│   ├── QuranPlayerViewModel.kt       # Player state management
+│   └── ReciterPickerDialog.kt        # Reciter selection dialog (public API)
+├── search/
+│   ├── SearchView.kt                 # Search composable
+│   └── SearchViewModel.kt            # Search state management
+├── bookmarks/
+│   └── BookmarksViewModel.kt         # Bookmark state management
+├── history/
+│   └── ReadingHistoryViewModel.kt    # Reading history state management
+├── settings/
+│   └── SettingsViewModel.kt          # Settings state management
+├── theme/
+│   ├── Color.kt                      # Color definitions
+│   ├── Theme.kt                      # Theme composables
+│   ├── ThemeViewModel.kt             # Theme state management
+│   └── Typography.kt                 # Font configuration
+├── di/
+│   └── UiModule.kt                   # Koin ViewModels
 └── internal/
-    └── MushafUiInitProvider.kt # ContentProvider for UI module
+    └── MushafUiInitProvider.kt        # ContentProvider for UI module
 ```
 
 ### Key Benefits
