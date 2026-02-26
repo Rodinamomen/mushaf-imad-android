@@ -75,10 +75,18 @@ internal class QuranPlayerViewModel(
     private fun observePlayerState() {
         viewModelScope.launch {
             audioRepository.getPlayerStateFlow().collect { playerState ->
-                _playbackState.value = playerState.playbackState
-                _currentTimeMs.value = playerState.currentPositionMs
-                _durationMs.value = playerState.durationMs
-                _isRepeatEnabled.value = playerState.isRepeatEnabled
+                // Only update StateFlows when values actually change.
+                // StateFlow skips equal values, so this prevents cascading recompositions
+                // in composables that don't depend on position (e.g. PlayerControls) from
+                // firing on every ~100ms position tick.
+                if (_playbackState.value != playerState.playbackState)
+                    _playbackState.value = playerState.playbackState
+                if (_currentTimeMs.value != playerState.currentPositionMs)
+                    _currentTimeMs.value = playerState.currentPositionMs
+                if (_durationMs.value != playerState.durationMs)
+                    _durationMs.value = playerState.durationMs
+                if (_isRepeatEnabled.value != playerState.isRepeatEnabled)
+                    _isRepeatEnabled.value = playerState.isRepeatEnabled
 
                 // Start/stop verse tracking based on playback state
                 if (playerState.isPlaying) {

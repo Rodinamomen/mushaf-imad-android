@@ -47,19 +47,23 @@ fun MushafWithPlayerView(
     val playerViewModel: QuranPlayerViewModel = koinViewModel()
 
     val mushafUiState by mushafViewModel.uiState.collectAsState()
-    val currentVerseNumber by playerViewModel.currentVerseNumber.collectAsState()
 
-    // Track highlighted verse
-    var highlightedVerse by remember { mutableStateOf<Verse?>(null) }
+    val onPreviousVerse = remember(playerViewModel) { { playerViewModel.seekToPreviousVerse() } }
+    val onNextVerse = remember(playerViewModel) { { playerViewModel.seekToNextVerse() } }
+    val onPageChangedStable: ((Int) -> Unit)? = remember(onPageChanged) {
+        onPageChanged?.let { cb -> { page: Int -> cb(page) } }
+    }
 
-    // Update highlighted verse when audio plays
-    LaunchedEffect(currentVerseNumber, mushafUiState.verses) {
-        if (currentVerseNumber != null && currentVerseNumber!! > 0) {
-            // Find verse by number on current page
-            val verse = mushafUiState.verses.find { it.number == currentVerseNumber }
-            highlightedVerse = verse
-        } else {
-            highlightedVerse = null
+      var highlightedVerse by remember { mutableStateOf<Verse?>(null) }
+
+    val verses = mushafUiState.verses
+    LaunchedEffect(playerViewModel, verses) {
+        playerViewModel.currentVerseNumber.collect { verseNumber ->
+            highlightedVerse = if (verseNumber != null && verseNumber > 0) {
+                verses.find { it.number == verseNumber }
+            } else {
+                null
+            }
         }
     }
 
@@ -86,9 +90,7 @@ fun MushafWithPlayerView(
                 showNavigationControls = showNavigationControls,
                 showPageInfo = showPageInfo,
                 onVerseSelected = onVerseSelected,
-                onPageChanged = { page ->
-                    onPageChanged?.invoke(page)
-                },
+                onPageChanged = onPageChangedStable,
                 viewModel = mushafViewModel
             )
         }
@@ -103,14 +105,8 @@ fun MushafWithPlayerView(
                     chapterNumber = chapterNumber,
                     chapterName = chapterName,
                     autoPlay = false,
-                    onPreviousVerse = {
-                        // Navigate to previous verse
-                        playerViewModel.seekToPreviousVerse()
-                    },
-                    onNextVerse = {
-                        // Navigate to next verse
-                        playerViewModel.seekToNextVerse()
-                    },
+                    onPreviousVerse = onPreviousVerse,
+                    onNextVerse = onNextVerse,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
